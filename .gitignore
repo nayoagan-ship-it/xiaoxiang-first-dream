@@ -1,0 +1,17 @@
+node_modules/
+.openai/
+.sites-runtime/
+.cache/
+artifacts/
+qa/
+*.log
+*.tmp
+*.wav
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.pfx
+.DS_Store
+Thumbs.db

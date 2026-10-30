@@ -1,0 +1,16 @@
+{
+  "name": "xiaoxiang-first-dream",
+  "version": "0.1.0",
+  "private": true,
+  "description": "潇湘初梦 · 林黛玉进贾府：红楼梦第一人称短篇视觉小说",
+  "license": "MIT",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node --check dist/story.js && node --check dist/app.js && node --check server.mjs && node --check tests/flows.cjs",
+    "test": "node tests/flows.cjs"
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0"
+  }
+}

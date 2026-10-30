@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#233d35">
+  <meta name="description" content="以林黛玉之眼，走过初入荣国府的一日。红楼梦第一人称短篇视觉小说。">
+  <title>潇湘初梦 · 林黛玉进贾府</title>
+  <link rel="icon" href="assets/flower.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="team.css">
+  <link rel="stylesheet" href="ui.css">
+  <script src="story.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main id="app">
+    <section id="cover" class="cover" aria-label="游戏标题画面">
+      <div class="cover-art" aria-hidden="true"></div><div class="cover-veil" aria-hidden="true"></div>
+      <header class="cover-top"><span class="imprint"><img src="assets/flower.svg" alt="">红楼梦 · 互动叙事</span><span class="cover-edition">红楼 · 第三回</span></header>
+      <div class="cover-copy">
+        <div class="eyebrow"><span></span> 一卷红楼，一日初逢</div>
+        <div class="title-lockup"><h1>潇湘<br><span>初梦</span></h1><span class="seal" aria-hidden="true">入梦</span></div>
+        <h2>林黛玉初进贾府</h2>
+        <p class="cover-poem">轿帘轻落，朱门初启。<br>这一步之后，便是我的红楼。</p>
+        <div class="cover-actions" role="group" aria-label="开始游戏与创作团队"><button id="start" class="primary">初入荣府 <span>→</span></button><button id="continue" class="secondary" hidden>续上前梦 <span>↗</span></button><button id="team-open" class="secondary team-button" data-action="team">创作团队 <span><img src="assets/flower.svg" alt=""></span></button></div>
+        <nav class="cover-menu" aria-label="开始菜单"><button class="cover-menu-item" data-action="settings">阅读设置</button><button class="cover-menu-item" data-action="about">关于此梦</button></nav>
+        <p class="cover-instructions">以黛玉之眼观人，以黛玉之心作答。</p>
+      </div>
+      <div class="vertical-note" aria-hidden="true">半卷珠帘，一场初见</div>
+      <footer class="cover-bottom"><span>第一人称视觉小说</span><span>五幕故事 <i>·</i> 约十分钟 <i>·</i> 三种心境</span></footer>
+    </section>
+
+    <section id="team" class="team" hidden aria-labelledby="team-title">
+      <header class="team-top"><button id="team-back" class="team-back" data-action="team-back"><span aria-hidden="true">←</span> 返回开始界面</button><span class="team-wordmark">潇湘初梦</span></header>
+      <div class="team-content">
+        <div class="team-intro single-author"><p class="eyebrow">一卷红楼 · 同心创作</p><h2 id="team-title" tabindex="-1">创作团队</h2><div class="team-meta"><p><span>专业</span>数据资源与数据智能</p><i aria-hidden="true"></i><p><span>年级</span>2026级</p></div></div>
+        <div class="team-members single-member">
+          <article class="team-member"><div class="team-avatar"><img src="assets/team/liu-shuhao.jpg" alt="刘书昊的人物形象" width="1080" height="1080"></div><div class="team-member-name"><h4>刘书昊</h4></div></article>
+        </div>
+        <p class="team-footnote">2026级 · 数据资源与数据智能</p>
+      </div>
+    </section>
+
+    <section id="game" class="game" hidden aria-label="剧情画面">
+      <div id="background" class="background" data-scene="courtyard" aria-hidden="true"></div>
+      <div class="scene-wash" aria-hidden="true"></div><div id="petals" aria-hidden="true"></div>
+      <header class="game-top">
+        <button id="home" class="wordmark" aria-label="返回标题">潇湘初梦<span>·</span></button>
+        <div class="chapter-heading"><span id="chapter-number">壹</span><div><small id="chapter-place">荣国府 · 垂花门</small><h2 id="chapter-title">朱门初启</h2></div></div>
+        <nav class="toolbar" aria-label="游戏菜单"><button data-action="history">回看 <kbd>H</kbd></button><button data-action="save">存档</button><button data-action="load">读档</button><button data-action="settings" aria-label="阅读设置">设置</button></nav>
+      </header>
+      <div class="scene-note" aria-hidden="true"><span id="scene-caption">朱门深处，步步留心</span><i></i></div>
+      <div class="portrait-wrap" id="portrait-wrap" aria-hidden="true"><img id="portrait" alt="" src="assets/jiamu.png"><span id="portrait-caption"></span></div>
+      <aside id="choice-panel" class="choice-panel" hidden aria-label="剧情选择"><p class="choice-eyebrow">一念之间</p><h3 id="choice-prompt"></h3><div id="choices"></div><p class="choice-hint">选择会留下不同的心声</p></aside>
+      <div id="chapter-flash" class="chapter-flash" aria-hidden="true"><small>第一幕</small><strong>朱门初启</strong></div>
+      <section id="dialogue" class="dialogue" aria-label="当前对话">
+        <div class="speaker-strip"><span class="speaker-mark" aria-hidden="true">❀</span><h3 id="speaker">林黛玉</h3><span id="speaker-kind">心声</span><span class="beat-count" id="beat-count">壹 / 伍</span></div>
+        <button id="dialogue-body" class="dialogue-body" aria-label="推进剧情"><span id="text"></span></button>
+        <div class="dialogue-bottom"><span id="reading-hint">点击文字或按 空格 / 回车 继续</span><div><button id="auto" aria-pressed="false">自动阅读</button><span class="small-divider"></span><button id="next" aria-label="继续剧情">继续 <span>▸</span></button></div></div>
+      </section>
+      <footer class="game-footer"><ol id="chapter-progress" aria-label="章节进度"></ol><span>荣国府的一日 · 黛玉视角</span></footer>
+    </section>
+
+    <section id="ending" class="ending" hidden aria-label="故事结局">
+      <div class="ending-art" aria-hidden="true"></div><div class="ending-paper"></div>
+      <div class="ending-content"><span class="eyebrow">一日将尽 · 此心何寄</span><div class="ending-seal">梦记</div><p id="ending-index" class="ending-index">心境 · 其一</p><h2 id="ending-title"></h2><p id="ending-poem" class="ending-poem"></p><p id="ending-text"></p><div id="ending-memories" class="ending-memories"></div><p class="ending-note">这是这一日的心境，不是红楼故事的终点。</p><div class="ending-actions"><button id="replay" class="primary">再入此梦 <span>↻</span></button><button id="ending-history" class="secondary">回看此行</button><button id="ending-home" class="quiet">返回标题</button></div><p id="ending-collection" class="collection"></p></div>
+    </section>
+  </main>
+  <dialog id="modal"><div class="modal-heading"><div><span class="eyebrow" id="modal-eyebrow">潇湘初梦</span><h2 id="modal-title"></h2></div><button id="close-modal" class="close" aria-label="关闭弹窗">×</button></div><div id="modal-content"></div></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
