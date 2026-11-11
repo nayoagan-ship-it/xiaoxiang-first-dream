@@ -1,0 +1,76 @@
+{
+  "status": "passed",
+  "checks": [
+    "eight furnished rooms entered and exited by actual walking",
+    "new room interactions discovered",
+    "roof cutaway and solid rear backdrop",
+    "room title and close camera",
+    "roof restored after exit"
+  ],
+  "rooms": [
+    {
+      "id": "hall",
+      "name": "贾母正房",
+      "entered": true,
+      "interaction": "incense",
+      "exited": true
+    },
+    {
+      "id": "study",
+      "name": "西厢书阁",
+      "entered": true,
+      "interaction": "inkstone",
+      "exited": true
+    },
+    {
+      "id": "guest",
+      "name": "东侧绣楼",
+      "entered": true,
+      "interaction": "mirror",
+      "exited": true
+    },
+    {
+      "id": "tea",
+      "name": "茶房",
+      "entered": true,
+      "interaction": "kettle",
+      "exited": true
+    },
+    {
+      "id": "service",
+      "name": "随侍歇房",
+      "entered": true,
+      "interaction": "folded-quilt",
+      "exited": true
+    },
+    {
+      "id": "sewing",
+      "name": "针线绣房",
+      "entered": true,
+      "interaction": "embroidery",
+      "exited": true
+    },
+    {
+      "id": "music",
+      "name": "临水琴室",
+      "entered": true,
+      "interaction": "qin",
+      "exited": true
+    },
+    {
+      "id": "gatehouse",
+      "name": "门房",
+      "entered": true,
+      "interaction": "ledger",
+      "exited": true
+    }
+  ],
+  "stats": {
+    "rooms": 8,
+    "furniture": 57,
+    "books": 207,
+    "ornaments": 21,
+    "carvedDetails": 1075
+  },
+  "errors": []
+}

@@ -1,0 +1,12 @@
+/* A softly framed memory lives beside, rather than in place of, the main portrait. */
+.memory-echo{margin:0;position:absolute;right:5.2%;top:15%;width:clamp(158px,15vw,220px);height:clamp(218px,28vw,288px);z-index:2;pointer-events:none;opacity:.9;isolation:isolate;will-change:opacity,transform;filter:drop-shadow(0 8px 20px #2e443b16)}
+.memory-window{position:absolute;inset:0 3% 25px;border-radius:49% 49% 29% 29% / 35% 35% 23% 23%;border:1px solid #f9efd8ac;background:radial-gradient(ellipse at 45% 38%,#fff7e9dc,#e6e8d8b8 62%,#dadfc563);box-shadow:0 0 0 5px #f7f0df1a,inset 0 0 24px #fff7e987;overflow:hidden}
+.memory-window:after{content:"";position:absolute;inset:7px;border:1px solid #b7aa7b52;border-radius:inherit;pointer-events:none}
+.memory-window img{position:absolute;width:158%;height:158%;max-width:none;left:-29%;top:5%;object-fit:contain;object-position:center top;filter:saturate(.67) sepia(.12);mask-image:linear-gradient(#000 58%,#0009 77%,transparent 94%)}
+.memory-echo figcaption{position:absolute;bottom:0;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:6px;color:#f7ecd1;text-shadow:0 1px 7px #193b2c99}
+.memory-echo figcaption small{font-size:8px;letter-spacing:4px;color:#e2d5b5}.memory-echo figcaption span{font:400 15px/1.3 var(--serif);letter-spacing:5px;padding-left:5px}
+.has-memory #portrait-caption{opacity:0}.heart-mode .memory-echo figcaption{color:#566f60;text-shadow:0 1px 8px #fffbe9}.heart-mode .memory-echo figcaption small{color:#8d826c}
+@media(max-height:800px){.memory-echo{top:16%;width:176px;height:238px}}
+@media(max-height:700px){.memory-echo{top:15%;width:158px;height:218px;right:4%}.memory-echo figcaption span{font-size:14px}}
+body.reduced-motion .memory-echo{will-change:auto}
+@media(prefers-reduced-motion:reduce){.memory-echo{will-change:auto}}

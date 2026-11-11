@@ -10,6 +10,16 @@
 
 下载源码后也可双击 `开始游戏.html` 离线游玩，更多本地运行方式见 [BUILDING.md](BUILDING.md)。
 
+## 三维贾府漫游 · V11.5
+
+新增可自由探索的三维贾府：方块黛玉、亭台假山、高低院落、八间内室，以及会随发言者切换的水彩对话立绘。
+
+- [查看三维版源码与操作说明](jiafu-3d/README.md)
+- [下载完整试玩包与可编辑模型](https://github.com/nayoagan-ship-it/xiaoxiang-first-dream/releases/tag/jiafu-v11.5.0)
+- 安装 Node.js 后，在仓库根目录运行 `npm run start:3d`，打开 http://127.0.0.1:4177/ 。
+
+三维版位于独立的 `jiafu-3d/` 目录；原公开网址继续提供二维阅读版。
+
 ## 作者的话
 
 一枚没玩过Galgame的萌新的初次尝试

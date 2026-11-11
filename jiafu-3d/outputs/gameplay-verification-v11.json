@@ -1,0 +1,45 @@
+{
+  "status": "passed",
+  "checks": [
+    "actual WASD movement",
+    "actual click-to-walk across courtyard",
+    "exploration before story",
+    "original first-act choice",
+    "pause and refresh mid-dialogue",
+    "single scoring and resumed branch",
+    "door navigation and interior roof fade",
+    "automatic route into study",
+    "journal discovery",
+    "first-act completion with continued exploration",
+    "petal collected once",
+    "position/door/story persistence",
+    "three desktop layouts",
+    "actual rockery tunnel traversal",
+    "actual hill pavilion stair ascent",
+    "actual zigzag bridge traversal",
+    "raised hall steps",
+    "actual elevated court mouse click and ascent"
+  ],
+  "final": {
+    "x": 23,
+    "z": -4.5,
+    "overview": true,
+    "dialogue": false,
+    "place": "garden",
+    "discovered": [
+      "tea-door",
+      "book",
+      "petals",
+      "hill-pavilion",
+      "pavilion"
+    ],
+    "arrived": true,
+    "complete": true,
+    "path": 0,
+    "fps": 49,
+    "calls": 1191,
+    "triangles": 2306100
+  },
+  "errors": [],
+  "consoleErrors": []
+}

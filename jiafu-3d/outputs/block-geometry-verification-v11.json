@@ -1,0 +1,113 @@
+{
+  "status": "passed",
+  "faceRevision": 4,
+  "checks": [
+    "all eleven actors use block-only materials and planar faces",
+    "reference square-eye facial style",
+    "distinct facial profiles for all actors",
+    "no avatar texture dependency",
+    "articulated player limbs",
+    "bounded block geometry"
+  ],
+  "actors": [
+    {
+      "design": "daiyu",
+      "name": "林黛玉",
+      "pose": "低首拢帕",
+      "blocks": 59,
+      "triangles": 695,
+      "faceDraws": 3,
+      "height": 2.6870901452136433
+    },
+    {
+      "design": "baoyu",
+      "name": "贾宝玉",
+      "pose": "侧身招手",
+      "blocks": 63,
+      "triangles": 722,
+      "faceDraws": 3,
+      "height": 2.7149043699940094
+    },
+    {
+      "design": "jiamu",
+      "name": "贾母",
+      "pose": "倚杖含笑",
+      "blocks": 65,
+      "triangles": 710,
+      "faceDraws": 3,
+      "height": 2.8124800756474926
+    },
+    {
+      "design": "fengjie",
+      "name": "王熙凤",
+      "pose": "扬袖迎客",
+      "blocks": 70,
+      "triangles": 806,
+      "faceDraws": 3,
+      "height": 2.9535573735762304
+    },
+    {
+      "design": "wang",
+      "name": "王夫人",
+      "pose": "拢袖持珠",
+      "blocks": 56,
+      "triangles": 659,
+      "faceDraws": 3,
+      "height": 2.70708948079103
+    },
+    {
+      "design": "yingchun",
+      "name": "贾迎春",
+      "pose": "垂眸拢袖",
+      "blocks": 50,
+      "triangles": 587,
+      "faceDraws": 3,
+      "height": 2.650884784227966
+    },
+    {
+      "design": "tanchun",
+      "name": "贾探春",
+      "pose": "抬手相邀",
+      "blocks": 56,
+      "triangles": 638,
+      "faceDraws": 3,
+      "height": 2.968831961922271
+    },
+    {
+      "design": "xichun",
+      "name": "贾惜春",
+      "pose": "抱帕微仰",
+      "blocks": 55,
+      "triangles": 647,
+      "faceDraws": 3,
+      "height": 2.122721320441486
+    },
+    {
+      "design": "xueyan",
+      "name": "雪雁",
+      "pose": "护住包袱",
+      "blocks": 56,
+      "triangles": 659,
+      "faceDraws": 3,
+      "height": 2.3228323590651465
+    },
+    {
+      "design": "matron",
+      "name": "引路婆子",
+      "pose": "倾身引路",
+      "blocks": 56,
+      "triangles": 602,
+      "faceDraws": 3,
+      "height": 2.5227115584735333
+    },
+    {
+      "design": "keeper",
+      "name": "看门仆人",
+      "pose": "拱手候客",
+      "blocks": 47,
+      "triangles": 551,
+      "faceDraws": 3,
+      "height": 2.6679967185434483
+    }
+  ]
+}

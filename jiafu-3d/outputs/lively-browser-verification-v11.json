@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "checks": [
+    "nearby NPC turns toward Daiyu",
+    "visible breathing transforms in live scene",
+    "speaker mouth and welcoming arm move",
+    "Daiyu turns and replies while NPC listens",
+    "motion checkbox freezes gestures",
+    "OS reduced-motion freezes gestures"
+  ],
+  "errors": []
+}

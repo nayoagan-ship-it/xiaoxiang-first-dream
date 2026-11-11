@@ -29,3 +29,7 @@ MIT 许可证适用于项目自身贡献，不将原著署名改为项目作者�
 
 网页运行时不依赖第三方 JavaScript 库、在线字体或外部 CDN。
 jsdom 仅用于开发测试，依赖版本与各包声明的许可保存在 package-lock.json；node_modules 不随仓库分发。
+
+## 三维贾府新增内容
+
+`jiafu-3d/` 使用Three.js构建程序化地图及方块人物，Three.js的MIT许可保留于该目录的 `THREE-LICENSE.txt`。Vite为开发构建工具。新增水彩人物立绘由本项目使用内置image_gen生成，参考图为原有黛玉立绘，完整提示词保留在 `jiafu-3d/public/assets/portraits-v11/prompts.json`。新增源代码与素材沿用本仓库项目许可；创作署名头像的原有使用边界不变。

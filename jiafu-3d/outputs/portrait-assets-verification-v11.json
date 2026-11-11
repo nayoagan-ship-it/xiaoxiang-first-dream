@@ -1,0 +1,101 @@
+{
+  "status": "passed",
+  "assets": [
+    {
+      "id": "keeper",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        254
+      ]
+    },
+    {
+      "id": "maid",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        254
+      ]
+    },
+    {
+      "id": "matron",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        254
+      ]
+    },
+    {
+      "id": "tanchun",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        254
+      ]
+    },
+    {
+      "id": "wang",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        254
+      ]
+    },
+    {
+      "id": "xichun",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        254
+      ]
+    },
+    {
+      "id": "xueyan",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        254
+      ]
+    },
+    {
+      "id": "yingchun",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        254
+      ]
+    }
+  ]
+}

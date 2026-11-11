@@ -1,0 +1,21 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><link rel="icon" href="data:,"><title>人物模型近景检查</title>
+<style>*{box-sizing:border-box}body{margin:0;background:#e9e2d2;font-family:'Microsoft YaHei',sans-serif;color:#36564b}header{height:90px;padding:20px 36px;display:flex;align-items:center;gap:24px}h1{font-size:25px;font-weight:500;margin:0}small{font-size:14px}main{height:calc(100vh - 140px);display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#c7c8b7}section{position:relative;min-width:0;background:#eae4d6}section canvas{width:100%;height:100%;display:block}section span{position:absolute;left:24px;top:15px;color:#526f60;font-size:16px;pointer-events:none}footer{padding:14px 36px;font-size:14px}</style>
+<header><h1 id="name"></h1><small id="version"></small></header><main><section><canvas></canvas><span>正面 · 15°</span></section><section><canvas></canvas><span>侧后 · 发型与衣摆</span></section><section><canvas></canvas><span>地图斜俯视 · 40°</span></section></main><footer>实际三维模型渲染 · 可旋转的完整几何 · 不使用概念图替代模型</footer>
+<script type="module">
+import * as T from 'three';import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+import {updateCharacter} from '/src/character-motion.js';
+const params=new URLSearchParams(location.search),old=params.has('baseline'),key=params.get('design')||'daiyu';
+const{createPerson}=await import(/* @vite-ignore */ old?'/.cache/characters-v11-before-face-polish.js':'/src/characters.js');
+const views=[],people=[];
+for(const[canvas,index]of [...document.querySelectorAll('canvas')].map((c,i)=>[c,i])){
+ const renderer=new T.WebGLRenderer({canvas,antialias:true,preserveDrawingBuffer:true});renderer.setPixelRatio(1.5);renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.95;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
+ const scene=new T.Scene();scene.background=new T.Color('#eae4d6');const person=createPerson({design:key,animated:true});await person.ready;scene.add(person.root);scene.add(new T.HemisphereLight('#fff8e7','#9e998c',.95));const sun=new T.DirectionalLight('#fff4df',2.0);sun.position.set(-3,7,6);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-3;sun.shadow.camera.right=3;sun.shadow.camera.top=4;sun.shadow.camera.bottom=-2;sun.shadow.normalBias=.014;sun.shadow.bias=-.00008;scene.add(sun);const fill=new T.DirectionalLight('#eef5ff',.6);fill.position.set(4,3,-2);scene.add(fill);
+ const pmrem=new T.PMREMGenerator(renderer),environment=new RoomEnvironment();scene.environment=pmrem.fromScene(environment,.04).texture;scene.environmentIntensity=.3;environment.dispose();pmrem.dispose();
+ const ground=new T.Mesh(new T.PlaneGeometry(200,200),new T.MeshStandardMaterial({color:'#e4ddca',roughness:1}));ground.rotation.x=-Math.PI/2;ground.position.y=-.008;ground.receiveShadow=true;scene.add(ground);
+ people.push(person);const camera=new T.OrthographicCamera(-1,1,1,-1,.01,50);const height=person.height||2.7,centre=new T.Vector3(0,height*.48,0),offset=[new T.Vector3(2,2.5,9),new T.Vector3(7,3,-7),new T.Vector3(7,9,7)][index];camera.position.copy(centre).add(offset);camera.lookAt(centre);
+ const render=()=>{const rect=canvas.getBoundingClientRect(),aspect=rect.width/rect.height,half=height*.61;renderer.setSize(rect.width,rect.height,false);camera.left=-half*aspect;camera.right=half*aspect;camera.top=half;camera.bottom=-half;camera.updateProjectionMatrix();renderer.render(scene,camera);};views.push(render);render();
+ document.getElementById('name').textContent=person.root.name+' · 模型近景';
+}
+document.getElementById('version').textContent=old?'面部精修前 · V11.3':'面部精修 · V11.4';window.addEventListener('resize',()=>views.forEach(f=>f()));
+window.__CHARACTER_STUDY__={people,renderAt(time,options={}){if(!old)for(const person of people)updateCharacter(person,{time,delta:1/12,...options});views.forEach(f=>f());}};window.__MODEL_READY__=true;
+</script></html>

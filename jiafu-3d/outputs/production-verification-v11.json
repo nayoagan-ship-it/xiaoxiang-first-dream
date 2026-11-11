@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "checks": [
+    "local HTTP",
+    "WebGL scene",
+    "original dialogue",
+    "overview",
+    "developer mutation API absent"
+  ],
+  "characterTextures": 0,
+  "errors": []
+}

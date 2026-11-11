@@ -1,0 +1,67 @@
+{
+  "objects": 810,
+  "meshes": 600,
+  "atlasMaterials": [
+    "interior-cushion",
+    "interior-quilt",
+    "interior-rosecloth",
+    "interior-screen-art",
+    "interior-silk"
+  ],
+  "texturedMeshes": 5,
+  "packedAtlas": true,
+  "blend": "assets\\jiafu-block-map-v11.blend",
+  "glb": "assets\\jiafu-block-map-v11.glb",
+  "characters": [
+    "林黛玉",
+    "王夫人",
+    "王熙凤",
+    "贾宝玉",
+    "贾惜春",
+    "贾探春",
+    "贾母",
+    "贾迎春",
+    "雪雁"
+  ],
+  "characterBlend": "assets\\jiafu-block-characters-v11.blend",
+  "characterGlb": "assets\\jiafu-block-characters-v11.glb",
+  "status": "passed",
+  "faceRevision": 4,
+  "faceStyle": "reference-square",
+  "files": {
+    "jiafu-block-map-v11": {
+      "glbBytes": 114881424,
+      "blendBytes": 49347167,
+      "embeddedImages": 1,
+      "facialColourMeshes": 33,
+      "principalCharacters": [
+        "林黛玉",
+        "王夫人",
+        "王熙凤",
+        "贾宝玉",
+        "贾惜春",
+        "贾探春",
+        "贾母",
+        "贾迎春",
+        "雪雁"
+      ]
+    },
+    "jiafu-block-characters-v11": {
+      "glbBytes": 831000,
+      "blendBytes": 329985,
+      "embeddedImages": 0,
+      "facialColourMeshes": 27,
+      "principalCharacters": [
+        "林黛玉",
+        "王夫人",
+        "王熙凤",
+        "贾宝玉",
+        "贾惜春",
+        "贾探春",
+        "贾母",
+        "贾迎春",
+        "雪雁"
+      ]
+    }
+  }
+}

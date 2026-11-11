@@ -1,0 +1,23 @@
+{
+  "status": "passed",
+  "faceRevision": 4,
+  "faceStyle": "reference-square",
+  "characters": [
+    "daiyu",
+    "baoyu",
+    "jiamu",
+    "fengjie",
+    "wang",
+    "yingchun",
+    "tanchun",
+    "xichun",
+    "xueyan"
+  ],
+  "views": [
+    "front",
+    "rear",
+    "map elevated"
+  ],
+  "sameCameraBaseline": "daiyu",
+  "errors": []
+}

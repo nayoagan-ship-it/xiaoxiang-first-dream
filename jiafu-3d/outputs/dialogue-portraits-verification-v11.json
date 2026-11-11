@@ -1,0 +1,25 @@
+{
+  "status": "passed",
+  "checks": [
+    "twelve correctly mapped speaker portraits",
+    "all ten NPC portraits and Daiyu replies in real scene",
+    "announcing maid portrait",
+    "speaker identity independent of memory portraits",
+    "slow image cannot overwrite reply or reappear after pause",
+    "choice layout at three desktop sizes",
+    "pause and resumed branch"
+  ],
+  "npcPortraits": [
+    "matron",
+    "xueyan",
+    "keeper",
+    "fengjie",
+    "jiamu",
+    "wang",
+    "yingchun",
+    "tanchun",
+    "xichun",
+    "baoyu"
+  ],
+  "errors": []
+}

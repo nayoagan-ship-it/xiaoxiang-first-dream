@@ -1,0 +1,85 @@
+{
+  "status": "passed",
+  "checks": [
+    "nine named characters including playable Daiyu",
+    "three redundant maids removed",
+    "two gate staff retained",
+    "all ten NPCs reached by actual continuous walking",
+    "all NPC conversations and first-person replies",
+    "V8 position and story/choice/door/journal preserved",
+    "no console errors"
+  ],
+  "actors": [
+    {
+      "id": "baoyu",
+      "name": "贾宝玉",
+      "location": "内院东侧回廊",
+      "walked": true,
+      "talked": true
+    },
+    {
+      "id": "fengjie",
+      "name": "王熙凤",
+      "location": "正房门边",
+      "walked": true,
+      "talked": true
+    },
+    {
+      "id": "jiamu",
+      "name": "贾母",
+      "location": "正房主榻前",
+      "walked": true,
+      "talked": true
+    },
+    {
+      "id": "wang",
+      "name": "王夫人",
+      "location": "正房右侧分席",
+      "walked": true,
+      "talked": true
+    },
+    {
+      "id": "yingchun",
+      "name": "贾迎春",
+      "location": "正房左侧分席",
+      "walked": true,
+      "talked": true
+    },
+    {
+      "id": "tanchun",
+      "name": "贾探春",
+      "location": "正房左侧前席",
+      "walked": true,
+      "talked": true
+    },
+    {
+      "id": "xichun",
+      "name": "贾惜春",
+      "location": "三春姊妹身旁",
+      "walked": true,
+      "talked": true
+    },
+    {
+      "id": "matron",
+      "name": "引路婆子",
+      "location": "停轿小院",
+      "walked": true,
+      "talked": true
+    },
+    {
+      "id": "xueyan",
+      "name": "雪雁",
+      "location": "随行箱笼旁",
+      "walked": true,
+      "talked": true
+    },
+    {
+      "id": "keeper",
+      "name": "看门仆人",
+      "location": "府门内侧",
+      "walked": true,
+      "talked": true
+    }
+  ],
+  "errors": []
+}

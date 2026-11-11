@@ -4,11 +4,16 @@
   "private": true,
   "description": "潇湘初梦 · 林黛玉进贾府：红楼梦第一人称短篇视觉小说",
   "license": "MIT",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "node server.mjs",
     "check": "node --check dist/story.js && node --check dist/app.js && node --check server.mjs && node --check tests/flows.cjs",
-    "test": "node tests/flows.cjs"
+    "test": "node tests/flows.cjs",
+    "start:3d": "node jiafu-3d/server.mjs",
+    "check:3d": "npm --prefix jiafu-3d run check",
+    "test:3d": "npm --prefix jiafu-3d test"
   },
   "devDependencies": {
     "jsdom": "26.1.0"

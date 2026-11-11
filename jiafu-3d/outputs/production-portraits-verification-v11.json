@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "checks": [
+    "twelve production portrait responses match packaged source bytes",
+    "Baoyu and Wang portraits in built game",
+    "Daiyu reply and pause cleanup",
+    "developer API absent"
+  ],
+  "errors": []
+}

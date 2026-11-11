@@ -1,0 +1,5 @@
+node_modules/
+.cache/
+*.blend1
+assets/jiafu-block-map-v11.glb
+assets/jiafu-block-map-v11.blend

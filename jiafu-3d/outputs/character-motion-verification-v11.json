@@ -1,0 +1,92 @@
+{
+  "status": "passed",
+  "rigRevision": 1,
+  "checks": [
+    "eleven distinct articulated poses",
+    "breathing leaves feet and roots planted",
+    "staggered blinking and speaking mouth",
+    "smooth turn and bounded head attention",
+    "disabled motion restores a stable pose",
+    "walking limb animation",
+    "finite world transforms"
+  ],
+  "actors": [
+    {
+      "design": "daiyu",
+      "pose": "低首拢帕",
+      "blink": true,
+      "feetPlanted": true,
+      "motionDisabled": true
+    },
+    {
+      "design": "baoyu",
+      "pose": "侧身招手",
+      "blink": true,
+      "feetPlanted": true,
+      "motionDisabled": true
+    },
+    {
+      "design": "jiamu",
+      "pose": "倚杖含笑",
+      "blink": false,
+      "feetPlanted": true,
+      "motionDisabled": true
+    },
+    {
+      "design": "fengjie",
+      "pose": "扬袖迎客",
+      "blink": true,
+      "feetPlanted": true,
+      "motionDisabled": true
+    },
+    {
+      "design": "wang",
+      "pose": "拢袖持珠",
+      "blink": true,
+      "feetPlanted": true,
+      "motionDisabled": true
+    },
+    {
+      "design": "yingchun",
+      "pose": "垂眸拢袖",
+      "blink": true,
+      "feetPlanted": true,
+      "motionDisabled": true
+    },
+    {
+      "design": "tanchun",
+      "pose": "抬手相邀",
+      "blink": true,
+      "feetPlanted": true,
+      "motionDisabled": true
+    },
+    {
+      "design": "xichun",
+      "pose": "抱帕微仰",
+      "blink": true,
+      "feetPlanted": true,
+      "motionDisabled": true
+    },
+    {
+      "design": "xueyan",
+      "pose": "护住包袱",
+      "blink": true,
+      "feetPlanted": true,
+      "motionDisabled": true
+    },
+    {
+      "design": "matron",
+      "pose": "倾身引路",
+      "blink": false,
+      "feetPlanted": true,
+      "motionDisabled": true
+    },
+    {
+      "design": "keeper",
+      "pose": "拱手候客",
+      "blink": true,
+      "feetPlanted": true,
+      "motionDisabled": true
+    }
+  ]
+}
