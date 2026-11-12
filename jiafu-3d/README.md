@@ -10,7 +10,7 @@
 
 在仓库根目录执行 `npm run start:3d`，或在本目录执行 `node server.mjs`，打开 http://127.0.0.1:4177/ 。Windows 也可双击本目录的 `启动贾府漫游.cmd`。
 
-[下载包含完整地图模型的试玩包](https://github.com/nayoagan-ship-it/xiaoxiang-first-dream/releases/tag/jiafu-v11.5.0)，完整解压后双击启动脚本。现有公开网址是二维阅读版；三维漫游版使用本机服务运行。
+[下载即玩包与完整可编辑模型包](https://github.com/nayoagan-ship-it/xiaoxiang-first-dream/releases/tag/jiafu-v11.5.0)。即玩包完整解压后双击启动脚本；模型包用于继续编辑，运行游戏只需即玩包。现有公开网址是二维阅读版；三维漫游版使用本机服务运行。
 
 ## 本版内容
 
