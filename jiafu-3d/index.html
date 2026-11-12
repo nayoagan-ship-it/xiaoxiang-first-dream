@@ -1,13 +1,36 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="application-name" content="Jiafu3D"><meta name="theme-color" content="#314f43"><title>潇湘初梦 · 贾府漫游</title><meta name="description" content="以黛玉之眼，走入一座可自由探索的3D贾府。朱门、回廊、池园与一日初逢。"><link rel="icon" href="./assets/flower.svg"></head>
-<body><main id="world" class="game"><div id="scene"></div><div class="edge-wash" aria-hidden="true"></div><div id="location-labels" aria-hidden="true"></div><div id="npc-labels" aria-hidden="true"></div>
- <header class="topbar"><div class="brand"><img src="./assets/flower.svg" alt=""><div><span>潇湘初梦</span><small>红楼梦 · 三维叙事地图</small></div></div><div class="place"><i>壹</i><div><small>荣国府 · 午后</small><h1 id="place-name">停轿小院</h1></div></div><nav aria-label="漫游菜单"><button id="overview">俯瞰全府 <kbd>F</kbd></button><button id="journal-open">黛玉手记 <kbd>J</kbd></button><button id="help-open" aria-label="操作与设置">操作与设置</button><a href="https://xiaoxiang-first-dream.nayoagan.chatgpt.site/">回到卷册 ↗</a></nav></header>
- <aside id="quest" class="quest"><span class="kicker">第一幕 · 朱门初启</span><h2 id="quest-title">一座陌生的庭院</h2><p id="quest-copy">可随婆子入府，也可先在庭院中走走。</p><div id="quest-steps"><span id="step-intro">○ 门前初念</span><span id="step-hall">○ 正房通报</span></div></aside>
- <aside class="mini-map"><div><span>荣府小记</span><button id="map-open" aria-label="展开地图">展开 ↗</button></div><canvas id="mini-map" width="264" height="220" aria-label="贾府地图及黛玉所在位置"></canvas><p><i></i> 黛玉 <span id="discover-count">发现 0 / 14</span></p></aside>
+<body>
+<svg class="ui-symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+ <symbol id="icon-overview" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z M3 12l9 5 9-5 M3 16l9 5 9-5"/></symbol>
+ <symbol id="icon-journal" viewBox="0 0 24 24"><path d="M12 6v15 M12 6C8 3 4 4 2 5v14c3-1 7-1 10 2 3-3 7-3 10-2V5c-3-1-7-2-10 1Z M5 9h4 M15 9h4 M5 13h4 M15 13h4"/></symbol>
+ <symbol id="icon-settings" viewBox="0 0 24 24"><path d="M4 6h16 M4 12h16 M4 18h16"/><path d="M8 3v6 M16 9v6 M10 15v6"/></symbol>
+ <symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M4 12h16 M14 6l6 6-6 6"/></symbol>
+ <symbol id="icon-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m16 8-2.5 5.5L8 16l2.5-5.5L16 8Z"/></symbol>
+ <symbol id="icon-pause" viewBox="0 0 24 24"><path d="M8 6v12 M16 6v12"/></symbol>
+ <symbol id="icon-expand" viewBox="0 0 24 24"><path d="M14 4h6v6 M20 4l-7 7 M10 20H4v-6 M4 20l7-7"/></symbol>
+</defs></svg>
+<main id="world" class="game"><div id="scene"></div><div class="edge-wash" aria-hidden="true"></div><div id="location-labels" aria-hidden="true"></div><div id="npc-labels" aria-hidden="true"></div>
+ <header class="topbar">
+  <div class="brand"><span class="brand-flower"><img src="./assets/flower.svg" alt=""></span><div><span>潇湘初梦</span><small>红楼一梦 · 荣府初逢</small></div></div>
+  <div class="place"><i aria-hidden="true">壹</i><div><small>荣国府 · 午后</small><h1 id="place-name">停轿小院</h1></div></div>
+  <nav aria-label="漫游菜单">
+   <button id="overview" aria-pressed="false"><svg class="ui-icon" aria-hidden="true"><use href="#icon-overview"/></svg><span class="nav-label">俯瞰全府</span><kbd>F</kbd></button>
+   <button id="journal-open"><svg class="ui-icon" aria-hidden="true"><use href="#icon-journal"/></svg><span>黛玉手记</span><kbd>J</kbd></button>
+   <button id="help-open" aria-label="操作与设置"><svg class="ui-icon" aria-hidden="true"><use href="#icon-settings"/></svg><span>操作与设置</span></button>
+   <a href="https://xiaoxiang-first-dream.nayoagan.chatgpt.site/"><span>回到卷册</span><svg class="ui-icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+  </nav>
+ </header>
+ <aside id="quest" class="quest paper-panel"><span class="kicker">第一幕 · 朱门初启</span><h2 id="quest-title">一座陌生的庭院</h2><p id="quest-copy">可随婆子入府，也可先在庭院中走走。</p><div id="quest-steps" aria-label="本幕进度"><span id="step-intro">门前初念</span><span id="step-hall">正房通报</span></div></aside>
+ <aside class="mini-map paper-panel" aria-label="荣府小记">
+  <div class="map-heading"><div><small>一方天地</small><span>荣府小记</span></div><button id="map-open" aria-label="展开地图" title="展开地图 · M"><svg class="ui-icon" aria-hidden="true"><use href="#icon-expand"/></svg></button></div>
+  <div class="map-frame"><canvas id="mini-map" width="264" height="220" aria-label="贾府地图及黛玉所在位置，点击展开"></canvas><span class="map-north" aria-hidden="true">北 ↑</span></div>
+  <p><i></i> 黛玉 <span id="discover-count">发现 0 / 14</span></p><progress id="discovery-progress" value="0" max="14" aria-label="探索发现进度"></progress>
+ </aside>
  <div id="interaction" class="interaction" hidden><span id="interact-kind">查看</span><strong id="interact-name"></strong><button id="interact-button"><kbd>E</kbd> <span>轻声相问</span></button></div>
- <footer class="bottom-bar"><div class="player-badge"><img src="./assets/flower.svg" alt=""><span>林黛玉<small>此间初来，步步留心</small></span></div><p><kbd>W A S D</kbd> 行走 <i>·</i> 点击地面寻路 <i>·</i> <kbd>E</kbd> 交互 <i>·</i> 滚轮缩放</p><button id="recenter">回到黛玉 <span>◎</span></button></footer>
- <div id="intro" class="intro"><span class="kicker">一入朱门 · 半卷初逢</span><h2>走入荣府</h2><p>轿帘轻落，庭院渐深。<br>我可以先随婆子入府，也可沿着花影与回廊，慢慢认得这里。</p><button id="begin" class="primary">入府漫游 <span>→</span></button><small>院落可自由探索 · 无倒计时 · 进度自动保存</small></div>
- <div id="dialogue-layer" hidden><div class="dialogue-shade"></div><img id="dialogue-portrait" class="dialogue-portrait" hidden decoding="async" draggable="false" alt=""><aside id="choice-panel" class="choice-panel" hidden aria-label="剧情选择"><span class="kicker">一念之间</span><h3 id="choice-prompt"></h3><div id="choices"></div></aside><section class="dialogue" aria-label="人物对话"><div class="speaker-strip"><h3 id="speaker">林黛玉</h3><span id="speaker-kind">心声</span><small id="dialogue-place"></small></div><button id="dialogue-body"><span id="dialogue-text"></span></button><div class="dialogue-bottom"><span id="reading-hint">点击文字或按空格继续</span><button id="dialogue-next">继续 <span>▸</span></button></div></section></div>
+ <footer class="bottom-bar"><div class="player-badge"><img src="./assets/flower.svg" alt=""><span>林黛玉<small>此间初来，步步留心</small></span></div><p><span><kbd>W A S D</kbd> 行走</span><i>·</i><span>点击地面寻路</span><i>·</i><span><kbd>E</kbd> 交互</span><i>·</i><span>滚轮缩放</span></p><button id="recenter"><svg class="ui-icon" aria-hidden="true"><use href="#icon-compass"/></svg>回到黛玉</button></footer>
+ <div id="intro" class="intro paper-panel"><span class="intro-seal" aria-hidden="true">入<br>府</span><span class="kicker">一入朱门 · 半卷初逢</span><h2>走入荣府</h2><div class="intro-rule" aria-hidden="true"><span></span>花影入庭<span></span></div><p>轿帘轻落，庭院渐深。<br>我可以先随婆子入府，也可沿着花影与回廊，慢慢认得这里。</p><button id="begin" class="primary"><span>入府漫游</span><svg class="ui-icon" aria-hidden="true"><use href="#icon-arrow"/></svg></button><small>院落自由探索 <span>·</span> 进度自动保存</small></div>
+ <div id="dialogue-layer" hidden><div class="dialogue-shade"></div><img id="dialogue-portrait" class="dialogue-portrait" hidden decoding="async" draggable="false" alt=""><aside id="choice-panel" class="choice-panel paper-panel" hidden aria-label="剧情选择"><span class="kicker">一念之间</span><h3 id="choice-prompt"></h3><div id="choices"></div></aside><section class="dialogue paper-panel" aria-label="人物对话"><div class="speaker-strip"><h3 id="speaker">林黛玉</h3><span id="speaker-kind">心声</span><small id="dialogue-place"></small></div><button id="dialogue-body" aria-label="对话内容，点击继续"><span id="dialogue-text"></span></button><div class="dialogue-bottom"><span id="reading-hint">点击文字或按空格继续</span><div class="reading-actions"><button id="dialogue-pause"><svg class="ui-icon" aria-hidden="true"><use href="#icon-pause"/></svg>暂停<kbd>Esc</kbd></button><button id="dialogue-next">继续<svg class="ui-icon" aria-hidden="true"><use href="#icon-arrow"/></svg></button></div></div></section></div>
  <figure id="memory-echo" class="memory-echo" hidden role="img" aria-label="心中忆影"><div class="memory-window"><img alt=""></div><figcaption aria-hidden="true"><small>心中一瞬</small><span data-memory-name></span></figcaption></figure>
- <dialog id="modal"><header><div><span class="kicker">潇湘初梦 · 荣府小记</span><h2 id="modal-title"></h2></div><button id="modal-close" aria-label="关闭">×</button></header><div id="modal-body"></div></dialog><div id="toast" role="status"></div><div id="loading"><img src="./assets/flower.svg" alt=""><p>朱门渐启，花影入庭……</p></div>
+ <dialog id="modal" class="paper-panel" aria-labelledby="modal-title"><header><div><span class="kicker">潇湘初梦 · 荣府小记</span><h2 id="modal-title"></h2></div><button id="modal-close" aria-label="关闭" title="关闭 · Esc">×</button></header><div id="modal-body"></div></dialog><div id="toast" role="status"></div><div id="loading"><img src="./assets/flower.svg" alt=""><p>朱门渐启，花影入庭……</p><small>潇湘初梦 · 第一幕</small></div>
 </main><script type="module" src="./main.js"></script></body></html>

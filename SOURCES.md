@@ -33,3 +33,5 @@ jsdom 仅用于开发测试，依赖版本与各包声明的许可保存在 pack
 ## 三维贾府新增内容
 
 `jiafu-3d/` 使用Three.js构建程序化地图及方块人物，Three.js的MIT许可保留于该目录的 `THREE-LICENSE.txt`。Vite为开发构建工具。新增水彩人物立绘由本项目使用内置image_gen生成，参考图为原有黛玉立绘，完整提示词保留在 `jiafu-3d/public/assets/portraits-v11/prompts.json`。新增源代码与素材沿用本仓库项目许可；创作署名头像的原有使用边界不变。
+
+V11.6 的导航图标和 `public/assets/ui/plum-spray.svg` 为代码绘制的 SVG，青黛宣纸主题位于 `src/ui-theme.css`，随项目代码一并提供。

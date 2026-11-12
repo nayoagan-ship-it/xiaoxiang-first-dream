@@ -76,4 +76,4 @@ FFmpeg 默认从 PATH 查找，也可以通过 `FFMPEG_PATH` 指定可执行文�
 
 ## 三维贾府漫游
 
-运行 `npm run start:3d` 启动已构建的三维版。源码开发、验证和模型导出见 [jiafu-3d/README.md](jiafu-3d/README.md)。原有二维版的运行与检查命令保持不变。
+运行 `npm run start:3d` 启动已构建的三维版。V11.6 将青黛宣纸界面合入 V11.5 完整游戏，继续使用相同的浏览器存档键。源码开发、验证和模型导出见 [jiafu-3d/README.md](jiafu-3d/README.md)。原有二维版的运行与检查命令保持不变。

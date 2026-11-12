@@ -1,4 +1,5 @@
 import './style.css';
+import './src/ui-theme.css';
 import './src/legacy-story.js';
 import './src/memory-echo.js';
 import * as T from 'three';
@@ -18,6 +19,7 @@ state.scores=Object.fromEntries(['reserve','warmth','resonance'].map(k=>[k,Numbe
 if(!['intro','hall'].includes(state.pendingMain?.tag)||!window.DREAM_STORY.nodes[state.pendingMain?.id])state.pendingMain=null;
 const settings={music:oldPrefs.music??true,motion:oldPrefs.motion??true,memories:oldPrefs.memories??true,speed:oldPrefs.speed??28,...loaded.settings};
 settings.speed=Math.max(0,Math.min(70,Number(settings.speed)||0));
+document.body.classList.toggle('ui-still',!settings.motion);
 let storageWarned=false,toastTimer=0,dialogue,nearest=null,conversationNpc=null,activeRoom=null,overview=!state.started,waypoints=[],keys=new Set(),time=0,saveClock=0,currentPlace='',isHidden=false;
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
 function toast(text){$('toast').textContent=text;$('toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('show'),3000);}
@@ -67,20 +69,21 @@ function blocked(){return !state.started||dialogue.active||$('modal').open||docu
 function updateHUD(){
  $('quest-title').textContent=state.complete?'朱门初启 · 已读':state.arrived?'庭院渐深，何处相逢':'一座陌生的庭院';
  $('quest-copy').textContent=state.complete?'这一日的初念已经记下，仍可随心探索。':state.arrived?'凤姐姐正在正房门边候着，也可先沿回廊走走。':'可随婆子入府，也可先在庭院中走走。';
- $('step-intro').textContent=(state.arrived?'✓':'○')+' 门前初念';$('step-intro').classList.toggle('done',state.arrived);$('step-hall').textContent=(state.complete?'✓':'○')+' 正房通报';$('step-hall').classList.toggle('done',state.complete);$('discover-count').textContent=`发现 ${state.discoveries.length} / ${world.interact.length}`;
+ $('step-intro').textContent='门前初念';$('step-intro').classList.toggle('done',state.arrived);$('step-intro').setAttribute('aria-label','门前初念'+(state.arrived?'，已完成':'，未完成'));$('step-hall').textContent='正房通报';$('step-hall').classList.toggle('done',state.complete);$('step-hall').setAttribute('aria-label','正房通报'+(state.complete?'，已完成':'，未完成'));$('discover-count').textContent=`发现 ${state.discoveries.length} / ${world.interact.length}`;$('discovery-progress').max=world.interact.length;$('discovery-progress').value=state.discoveries.length;
 }
 function navigate(x,z){if(blocked())return;const path=navigation.route(world.player.root.position.x,world.player.root.position.z,x,z);if(!path.length){toast('这处暂不便落脚，试试旁边的石径。');return;}waypoints=path;targetRing.position.set(path.at(-1).x,world.groundHeight(path.at(-1).x,path.at(-1).z)+.06,path.at(-1).z);targetRing.visible=true;}
-function changeOverview(force){overview=force??!overview;document.body.classList.toggle('overview-mode',overview);$('overview').firstChild.textContent=overview?'回到黛玉 ':'俯瞰全府 ';}
+function changeOverview(force){overview=force??!overview;document.body.classList.toggle('overview-mode',overview);$('overview').querySelector('.nav-label').textContent=overview?'回到黛玉':'俯瞰全府';$('overview').setAttribute('aria-pressed',String(overview));}
 function begin(){state.started=true;$('intro').hidden=true;changeOverview(false);save();dialogue.resume();renderer.domElement.focus({preventScroll:true});}
 $('begin').onclick=begin;$('intro').hidden=state.started;$('recenter').onclick=()=>changeOverview(false);$('overview').onclick=()=>changeOverview();$('interact-button').onclick=interact;
 
 function showModal(title){waypoints=[];keys.clear();targetRing.visible=false;dialogue.clearMemories();$('modal-title').textContent=title;$('modal-body').replaceChildren();$('modal').showModal();return $('modal-body');}
 $('modal-close').onclick=()=>$('modal').close();$('modal').addEventListener('click',e=>{if(e.target===$('modal')){const b=$('modal').getBoundingClientRect();if(e.clientX<b.left||e.clientX>b.right||e.clientY<b.top||e.clientY>b.bottom)$('modal').close();}});
-function journal(){const body=showModal('黛玉手记');const intro=document.createElement('p');intro.textContent=state.discoveries.length?'一日初来，所见所想，皆可留一笔。':'手记尚未落笔。与庭中的人物、物件相遇，慢慢记下这一日。';body.append(intro);for(const id of state.discoveries){const item=world.interact.find(i=>i.id===id);if(!item)continue;const entry=document.createElement('article');entry.className='journal-entry';const h=document.createElement('h3');h.textContent=item.name;const p=document.createElement('p');p.textContent=item.text;entry.append(h,p);body.append(entry);}const note=document.createElement('p');note.className='fine';note.textContent='手记、位置与第一幕剧情进度自动保存在当前浏览器。探索对白为文学再创作；主要入府对白沿用原游戏。';body.append(note);}
+function journal(){const body=showModal('黛玉手记');const intro=document.createElement('p');intro.textContent=state.discoveries.length?'一日初来，所见所想，皆可留一笔。':'手记尚未落笔。与庭中的人物、物件相遇，慢慢记下这一日。';if(state.discoveries.length){body.append(intro);}else{const empty=document.createElement('div'),flower=document.createElement('img');empty.className='journal-empty';flower.src='./assets/flower.svg';flower.alt='';empty.append(flower,intro);body.append(empty);}for(const id of state.discoveries){const item=world.interact.find(i=>i.id===id);if(!item)continue;const entry=document.createElement('article');entry.className='journal-entry';const h=document.createElement('h3');h.textContent=item.name;const p=document.createElement('p');p.textContent=item.text;entry.append(h,p);body.append(entry);}const note=document.createElement('p');note.className='fine';note.textContent='手记、位置与第一幕剧情进度自动保存在当前浏览器。探索对白为文学再创作；主要入府对白沿用原游戏。';body.append(note);}
 $('journal-open').onclick=journal;
 function help(){const body=showModal('漫游与阅读');body.innerHTML='<p>不必急着赶路。可以点击地面自动寻路，也可用键盘自行行走，靠近人物或物件时按 E。</p><div class="key-list"><span>WASD / 方向键 · 行走</span><span>E · 交互</span><span>F · 俯瞰 / 跟随</span><span>J · 手记</span><span>M · 地图</span><span>Esc · 暂停对话</span></div><div class="setting"><label>场景动效<small>人物步态、转场和屋顶渐隐</small></label><input id="setting-motion" type="checkbox"></div><div class="setting"><label>轻弦背景乐<small>首次操作后播放，无角色配音</small></label><input id="setting-music" type="checkbox"></div><div class="setting"><label>人物忆影<small>心声念及人物时，短暂浮现其形象</small></label><input id="setting-memory" type="checkbox"></div><div class="setting"><label>文字速度<small>最右侧即时显示</small></label><input id="setting-speed" type="range" min="0" max="70" step="5"></div><p class="fine" style="margin-top:17px">这是一张依据第一幕情节设计的艺术化贾府地图。可玩院落自由连通；正房通报完成后仍可继续探索。此处使用独立漫游存档。</p>';
  $('setting-motion').checked=settings.motion;$('setting-music').checked=settings.music;$('setting-memory').checked=settings.memories;$('setting-speed').value=70-settings.speed;
- $('setting-motion').onchange=e=>{settings.motion=e.target.checked;save();};$('setting-music').onchange=e=>{settings.music=e.target.checked;settings.music?startMusic():stopMusic();save();};$('setting-memory').onchange=e=>{settings.memories=e.target.checked;dialogue.clearMemories();save();};$('setting-speed').oninput=e=>{settings.speed=70-Number(e.target.value);save();};
+ for(const id of ['setting-motion','setting-music','setting-memory','setting-speed']){$(id).previousElementSibling.htmlFor=id;if($(id).type==='checkbox')$(id).setAttribute('role','switch');}
+ $('setting-motion').onchange=e=>{settings.motion=e.target.checked;document.body.classList.toggle('ui-still',!settings.motion);save();};$('setting-music').onchange=e=>{settings.music=e.target.checked;settings.music?startMusic():stopMusic();save();};$('setting-memory').onchange=e=>{settings.memories=e.target.checked;dialogue.clearMemories();save();};$('setting-speed').oninput=e=>{settings.speed=70-Number(e.target.value);save();};
 }
 $('help-open').onclick=help;
 const mapCanvas=$('mini-map'),mapContext=mapCanvas.getContext('2d');

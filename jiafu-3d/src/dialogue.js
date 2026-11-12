@@ -24,7 +24,7 @@ export function createDialogue({state,settings,save,onFinish}){
  function legacy(id,stop,tag){session=state.pendingMain?.tag===tag?{...state.pendingMain}:{kind:'legacy',id,stop,tag};render();}
  function lines(lines,tag){session={kind:'lines',lines,index:0,tag};render();}
  function pause(){if(!session)return;clearTimeout(timer);memories.clear();portraits.clear();if(session.kind==='legacy')state.pendingMain={...session,open:false};session=null;typing=false;$('dialogue-layer').hidden=true;document.body.classList.remove('reading');save();}
- $('dialogue-body').onclick=advance;$('dialogue-next').onclick=advance;
+ $('dialogue-body').onclick=advance;$('dialogue-next').onclick=advance;$('dialogue-pause').onclick=pause;
  document.addEventListener('keydown',e=>{if(!session||$('modal').open)return;if(e.key==='Escape'){e.preventDefault();pause();}else if(e.code==='Space'||e.code==='Enter'){if(e.target.closest('button')&&e.target!==$('dialogue-body'))return;e.preventDefault();advance();}else if(/^[123]$/.test(e.key)){e.preventDefault();if(typing)finishText();else choose(Number(e.key)-1);}});
  return {legacy,lines,pause,get active(){return Boolean(session);},get speaker(){return session?node?.who||'林黛玉':'';},resume(){if(state.pendingMain?.open){session={...state.pendingMain};render();}},clearMemories:memories.clear};
 }

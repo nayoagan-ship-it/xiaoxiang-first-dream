@@ -1,0 +1,36 @@
+{
+  "status": "passed",
+  "layouts": [
+    {
+      "width": 1600,
+      "height": 1000,
+      "entry": "passed"
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "entry": "passed"
+    },
+    {
+      "width": 980,
+      "height": 660,
+      "entry": "passed"
+    }
+  ],
+  "checks": [
+    "entry and navigation bounds at three desktop sizes",
+    "SVG navigation retained across view changes",
+    "native labelled settings switches and persistence",
+    "large map and journal dialogs",
+    "speaker portrait and dialogue layout",
+    "three choices without panel collisions",
+    "visible pause button",
+    "paused dialogue reload and resumed branch without duplicated choice",
+    "system reduced motion and scene motion switch",
+    "all twelve V11.5 portrait resources retained byte-for-byte",
+    "V11.5 saved positions and completed story load in merged edition",
+    "Baoyu and Wang conversations retain their own portraits and Daiyu replies"
+  ],
+  "errors": [],
+  "failed": []
+}
