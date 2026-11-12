@@ -37,7 +37,7 @@ npm run dev
 
 `src/` 为地图、建筑、室内、植被、人物与对话逻辑；`public/assets/` 为运行素材；`tools/` 为模型导出与验证工具；`outputs/` 为实际渲染截图及检查记录。
 
-`assets/jiafu-block-characters-v11.blend` 和 `.glb` 包含独立九人可编辑模型。完整地图的BLEND/GLB体积较大，随Release试玩包提供。也可执行 `node tools/export-map.mjs`，再用Blender后台运行 `tools/save-blender-map.py` 重建整府和九人模型。
+`assets/jiafu-block-characters-v11.blend` 和 `.glb` 包含独立九人可编辑模型。完整地图的BLEND/GLB体积较大，随Release完整可编辑模型包提供。也可执行 `node tools/export-map.mjs`，再用Blender后台运行 `tools/save-blender-map.py` 重建整府和九人模型。
 
 模型保存当前姿态与分组层级；呼吸、眨眼、交谈与屋顶剖开由网页代码实时驱动，未烘焙为模型动画片段。
 
