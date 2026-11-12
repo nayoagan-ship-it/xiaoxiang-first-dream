@@ -1,4 +1,5 @@
 $ErrorActionPreference='Stop'
+if(Test-Path -LiteralPath (Join-Path $PSScriptRoot '../stop-game.ps1')){& (Join-Path $PSScriptRoot '../stop-game.ps1');exit 0}
 $metaPath=Join-Path $PSScriptRoot '.cache/map-server.json'
 if(-not(Test-Path -LiteralPath $metaPath)){exit 0}
 $meta=Get-Content -LiteralPath $metaPath -Raw | ConvertFrom-Json

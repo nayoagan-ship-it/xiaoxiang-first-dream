@@ -2,33 +2,72 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
+  <meta name="application-name" content="XiaoxiangUnified">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#233d35">
-  <meta name="description" content="以林黛玉之眼，走过初入荣国府的一日。红楼梦第一人称短篇视觉小说。">
-  <title>潇湘初梦 · 林黛玉进贾府</title>
+  <meta name="description" content="以林黛玉之眼重读红楼。初入荣府与黛玉葬花，双卷第一人称视觉小说。">
+  <title>潇湘初梦 · 红楼梦互动叙事</title>
   <link rel="icon" href="assets/flower.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="team.css">
   <link rel="stylesheet" href="ui.css">
+  <link rel="stylesheet" href="chapters.css">
+  <link rel="stylesheet" href="garden-decor.css">
+  <link rel="stylesheet" href="physical-scroll.css">
+  <link rel="stylesheet" href="blossoms.css">
+  <link rel="stylesheet" href="heart.css">
+  <link rel="stylesheet" href="memory-echo.css">
   <script src="story.js" defer></script>
+  <script src="story-blossoms.js" defer></script>
+  <script src="chapters.js" defer></script>
+  <script src="scroll-library.js" defer></script>
+  <script src="memory-echo.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
   <main id="app">
     <section id="cover" class="cover" aria-label="游戏标题画面">
       <div class="cover-art" aria-hidden="true"></div><div class="cover-veil" aria-hidden="true"></div>
-      <header class="cover-top"><span class="imprint"><img src="assets/flower.svg" alt="">红楼梦 · 互动叙事</span><span class="cover-edition">红楼 · 第三回</span></header>
+      <header class="cover-top"><span class="imprint"><img src="assets/flower.svg" alt="">红楼梦 · 互动叙事</span><span class="cover-edition">红楼 · 黛玉视角</span></header>
       <div class="cover-copy">
-        <div class="eyebrow"><span></span> 一卷红楼，一日初逢</div>
+        <div class="eyebrow"><span></span> 一卷初逢，一卷惜春</div>
         <div class="title-lockup"><h1>潇湘<br><span>初梦</span></h1><span class="seal" aria-hidden="true">入梦</span></div>
-        <h2>林黛玉初进贾府</h2>
+        <h2>初入荣府 · 黛玉葬花</h2>
         <p class="cover-poem">轿帘轻落，朱门初启。<br>这一步之后，便是我的红楼。</p>
-        <div class="cover-actions" role="group" aria-label="开始游戏与创作团队"><button id="start" class="primary">初入荣府 <span>→</span></button><button id="continue" class="secondary" hidden>续上前梦 <span>↗</span></button><button id="team-open" class="secondary team-button" data-action="team">创作团队 <span><img src="assets/flower.svg" alt=""></span></button></div>
+        <div class="cover-actions" role="group" aria-label="章节选择、继续游戏与创作团队"><button id="start" class="primary" aria-label="展卷入梦，打开章节选择">展卷入梦 <span>→</span></button><button id="continue" class="secondary" hidden>续上前梦 <span>↗</span></button><button id="team-open" class="secondary team-button" data-action="team">创作团队 <span><img src="assets/flower.svg" alt=""></span></button></div>
         <nav class="cover-menu" aria-label="开始菜单"><button class="cover-menu-item" data-action="settings">阅读设置</button><button class="cover-menu-item" data-action="about">关于此梦</button></nav>
-        <p class="cover-instructions">以黛玉之眼观人，以黛玉之心作答。</p>
+        <p class="cover-instructions">展卷择回，以黛玉之眼重读红楼。</p>
       </div>
       <div class="vertical-note" aria-hidden="true">半卷珠帘，一场初见</div>
-      <footer class="cover-bottom"><span>第一人称视觉小说</span><span>五幕故事 <i>·</i> 约十分钟 <i>·</i> 三种心境</span></footer>
+      <footer class="cover-bottom"><span>第一人称视觉小说</span><span>双卷故事 <i>·</i> 黛玉视角 <i>·</i> 六种心境</span></footer>
+    </section>
+
+    <section id="chapters" class="chapter-library" hidden aria-labelledby="library-title">
+      <div class="library-decor" aria-hidden="true">
+        <div class="garden-light"></div>
+        <svg class="begonia-branch" viewBox="0 0 460 400" fill="none"><defs><g id="garden-flower"><path d="M0 0C-18-8-17-23-5-20C2-19 4-9 0 0Z" fill="#e5b6a9"/><path d="M0 0C-3-22 14-28 18-16C20-7 9-1 0 0Z" fill="#f0d0bd"/><path d="M0 0C17-15 30-7 23 4C17 10 6 7 0 0Z" fill="#e7b9a9"/><path d="M0 0C22 5 24 20 10 20C1 18-2 7 0 0Z" fill="#f2d5c0"/><path d="M0 0C3 23-13 28-19 15C-20 6-9 1 0 0Z" fill="#dcaa9c"/><circle r="3" fill="#bd9561"/><path d="M0 0L-6-6M0 0L6-7M0 0L8 3M0 0L2 9M0 0L-8 5" stroke="#bf995f" stroke-width=".7"/><g fill="#c2a16d"><circle cx="-6" cy="-6" r="1.2"/><circle cx="6" cy="-7" r="1.2"/><circle cx="8" cy="3" r="1.2"/><circle cx="2" cy="9" r="1.2"/><circle cx="-8" cy="5" r="1.2"/></g></g></defs><g class="begonia-sway"><path d="M466 8C404 50 374 105 303 140C221 181 181 245 141 333" stroke="#9c9372" stroke-width="4"/><path d="M392 78C347 65 308 65 267 91M314 135C315 89 305 54 288 32M242 185C206 168 171 168 139 179M199 235C214 270 215 293 205 324M166 288C129 277 99 280 73 300" stroke="#a69d7c" stroke-width="2"/><path d="M334 111Q340 76 363 74Q361 100 334 111M280 153Q259 117 241 122Q249 145 280 153M209 215Q173 207 167 222Q188 231 209 215M153 304Q120 327 126 348Q146 332 153 304" fill="#a7b397" opacity=".7"/><use href="#garden-flower" x="267" y="91" transform="rotate(-8 267 91) scale(1)"/><use href="#garden-flower" x="311" y="70"/><use href="#garden-flower" x="288" y="32" transform="rotate(25 288 32)"/><use href="#garden-flower" x="355" y="123"/><use href="#garden-flower" x="299" y="149"/><use href="#garden-flower" x="243" y="185" transform="rotate(20 243 185)"/><use href="#garden-flower" x="178" y="173"/><use href="#garden-flower" x="139" y="179" transform="rotate(-20 139 179)"/><use href="#garden-flower" x="205" y="287"/><use href="#garden-flower" x="175" y="264"/><use href="#garden-flower" x="108" y="285"/><use href="#garden-flower" x="141" y="333"/><path d="M385 82Q377 56 388 49Q403 64 385 82M222 203Q227 180 241 175Q248 192 222 203M143 326Q116 312 111 319Q118 335 143 326" fill="#c7aa98"/></g></svg>
+        <svg class="bamboo-shadow" viewBox="0 0 340 560" fill="none"><g class="bamboo-sway"><path d="M41 568C99 419 101 260 164 44M4 554C37 432 44 360 28 249M86 560C149 452 185 383 235 269" stroke="#829a7b" stroke-width="3"/><path d="M93 413L107 418M119 286L133 290M144 161L157 165M22 386L35 388M159 421L170 427" stroke="#7e9576" stroke-width="5"/><path d="M111 359C71 321 38 314 24 322C51 350 81 358 111 359ZM114 341C90 292 65 277 51 282C66 318 90 335 114 341ZM119 325C136 288 163 276 185 281C168 308 143 320 119 325ZM128 273C158 242 186 239 207 249C178 269 150 278 128 273ZM139 232C107 201 85 194 66 205C87 224 112 233 139 232ZM153 171C125 135 115 110 123 96C147 117 154 140 153 171ZM155 151C177 121 196 113 213 119C197 140 178 150 155 151ZM158 118C151 91 153 66 168 51C177 79 172 100 158 118ZM102 403C62 382 40 383 25 394C49 413 75 414 102 403ZM96 433C127 404 148 401 165 411C144 430 123 436 96 433ZM41 397C16 367 4 348 10 336C29 352 38 373 41 397ZM44 425C68 397 87 390 100 398C84 419 65 427 44 425ZM171 414C178 370 195 353 211 356C205 384 191 404 171 414ZM192 373C222 349 248 346 264 359C244 377 217 383 192 373ZM216 326C204 295 205 273 217 260C230 281 230 304 216 326ZM227 301C247 273 270 261 287 268C274 288 250 302 227 301Z" fill="#8b9f80"/><path d="M109 353L61 336M124 326L166 291M137 267L188 252M152 166L132 119M159 148L195 126M100 402L43 396M175 409L203 369M226 303L272 276" stroke="#e3e6d4" stroke-width=".7" opacity=".5"/></g></svg>
+        <div class="falling-blossoms" data-motion><i style="--x:8%;--time:25s;--delay:-8s;--size:11px"></i><i style="--x:18%;--time:29s;--delay:-21s;--size:8px"></i><i style="--x:29%;--time:23s;--delay:-3s;--size:10px"></i><i style="--x:40%;--time:31s;--delay:-17s;--size:7px"></i><i style="--x:51%;--time:26s;--delay:-12s;--size:9px"></i><i style="--x:63%;--time:28s;--delay:-23s;--size:7px"></i><i style="--x:74%;--time:22s;--delay:-6s;--size:11px"></i><i style="--x:83%;--time:30s;--delay:-18s;--size:9px"></i><i style="--x:91%;--time:24s;--delay:-9s;--size:12px"></i></div>
+        <div class="butterfly-flight butterfly-one" data-motion><svg viewBox="0 0 80 80"><g class="butterfly-wing wing-left"><path d="M40 40C29 12 1 10 8 33C9 42 20 47 37 44C19 40 10 54 20 62C30 70 37 52 40 40Z" fill="#dcb1a0" stroke="#ba9276" stroke-width=".8"/><path d="M37 40L13 25M36 44L23 59" stroke="#f6e6c8" stroke-width="1"/></g><g class="butterfly-wing wing-right"><path d="M40 40C51 12 79 10 72 33C71 42 60 47 43 44C61 40 70 54 60 62C50 70 43 52 40 40Z" fill="#ebcbb2" stroke="#ba9276" stroke-width=".8"/><path d="M43 40L67 25M44 44L57 59" stroke="#fff0d8" stroke-width="1"/></g><path d="M40 32Q37 42 40 57Q43 42 40 32M40 34Q34 22 31 25M40 34Q46 22 49 25" fill="#8d8f6b" stroke="#8d8f6b" stroke-width="1"/></svg></div>
+        <div class="butterfly-flight butterfly-two" data-motion><svg viewBox="0 0 80 80"><g class="butterfly-wing wing-left"><path d="M40 40C29 12 1 10 8 33C9 42 20 47 37 44C19 40 10 54 20 62C30 70 37 52 40 40Z" fill="#b8c5a4" stroke="#98a180" stroke-width=".8"/><path d="M37 40L13 25M36 44L23 59" stroke="#f0e8cd"/></g><g class="butterfly-wing wing-right"><path d="M40 40C51 12 79 10 72 33C71 42 60 47 43 44C61 40 70 54 60 62C50 70 43 52 40 40Z" fill="#d2d7ba" stroke="#98a180" stroke-width=".8"/><path d="M43 40L67 25M44 44L57 59" stroke="#fff0d8"/></g><path d="M40 32Q37 42 40 57Q43 42 40 32M40 34Q34 22 31 25M40 34Q46 22 49 25" fill="#91916c" stroke="#91916c"/></svg></div>
+      </div>
+      <header class="library-top"><button id="chapters-back" class="team-back"><span aria-hidden="true">←</span> <span id="chapters-back-label">返回开始界面</span></button><span class="team-wordmark">潇湘初梦</span></header>
+      <div class="scroll-workspace">
+        <div id="scroll-cabinet" class="scroll-cabinet">
+          <div class="cabinet-heading"><p class="library-kicker">一架旧梦 · 静候展卷</p><h2 id="library-title" tabindex="-1">红楼卷藏</h2><p class="cabinet-poem">从花影与旧事之间，抽出一回红楼。</p></div>
+          <div class="cabinet-summary"><span>黛玉手记 <i>·</i> 卷中回目</span><span id="library-count"></span></div>
+          <div class="scroll-rack"><ol id="volume-list" class="scroll-shelf" aria-label="选择一册卷宗，抽出展开"></ol><div class="shelf-rail" aria-hidden="true"></div></div>
+          <p class="cabinet-instruction"><img src="assets/flower.svg" alt="">轻点题签，抽卷展读<span>未成的篇章，亦可展卷一望</span></p>
+        </div>
+        <div id="scroll-reveal" class="scroll-reveal" hidden role="region" aria-labelledby="scroll-open-title">
+          <article class="unrolled-scroll">
+            <div class="scroll-surface"><div class="unrolled-art" aria-hidden="true"><span class="unrolled-art-seal">黛玉手记</span><span class="unrolled-art-poem">花影落笺<br>前尘入卷</span></div><div class="unrolled-content"><p id="scroll-open-kicker" class="library-kicker"></p><h3 id="scroll-open-title" tabindex="-1"></h3><p id="scroll-open-subtitle" class="unrolled-subtitle"></p><div class="unrolled-rule" aria-hidden="true"><img src="assets/flower.svg" alt=""></div><p id="scroll-open-description" class="unrolled-description"></p><p id="scroll-open-detail" class="unrolled-detail"></p><div class="unrolled-actions"><button id="scroll-read" class="primary">入此回梦 <span>→</span></button><button id="scroll-read-classic" class="quiet" hidden>原篇阅读</button><button id="scroll-return" class="quiet">收卷归架 <span aria-hidden="true">↩</span></button></div><p id="scroll-open-note" class="unrolled-note"></p></div></div>
+            <span class="paper-curl curl-left" aria-hidden="true"></span><span class="paper-curl curl-right" aria-hidden="true"></span><span class="scroll-roller roller-left" aria-hidden="true"></span><span class="scroll-roller roller-right" aria-hidden="true"></span>
+          </article>
+        </div>
+      </div>
+      <p id="library-announcement" class="library-announcement" role="status" aria-live="polite"></p>
+      <footer class="library-bottom"><span>一卷红楼 · 几许悲欢</span><span>抽一卷旧事，赴一场初逢 <i>·</i> Esc 收卷 / 返回</span></footer>
     </section>
 
     <section id="team" class="team" hidden aria-labelledby="team-title">
@@ -45,6 +84,9 @@
     <section id="game" class="game" hidden aria-label="剧情画面">
       <div id="background" class="background" data-scene="courtyard" aria-hidden="true"></div>
       <div class="scene-wash" aria-hidden="true"></div><div id="petals" aria-hidden="true"></div>
+      <div id="heart-threshold" aria-hidden="true"></div>
+      <div class="heart-atmosphere" aria-hidden="true"><div class="heart-mist"></div><div class="heart-ripples"><i></i><i></i><i></i></div></div>
+      <div id="heart-label" class="heart-label" hidden><span>心境 · 与自己相逢</span><h3 id="heart-title"></h3><p>此刻，我愿听见自己的心。</p></div>
       <header class="game-top">
         <button id="home" class="wordmark" aria-label="返回标题">潇湘初梦<span>·</span></button>
         <div class="chapter-heading"><span id="chapter-number">壹</span><div><small id="chapter-place">荣国府 · 垂花门</small><h2 id="chapter-title">朱门初启</h2></div></div>
@@ -52,6 +94,7 @@
       </header>
       <div class="scene-note" aria-hidden="true"><span id="scene-caption">朱门深处，步步留心</span><i></i></div>
       <div class="portrait-wrap" id="portrait-wrap" aria-hidden="true"><img id="portrait" alt="" src="assets/jiamu.png"><span id="portrait-caption"></span></div>
+      <figure id="memory-echo" class="memory-echo" hidden role="img" aria-label="黛玉脑海中的忆影"><div class="memory-window"><img alt=""></div><figcaption aria-hidden="true"><small>心中一瞬</small><span data-memory-name></span></figcaption></figure>
       <aside id="choice-panel" class="choice-panel" hidden aria-label="剧情选择"><p class="choice-eyebrow">一念之间</p><h3 id="choice-prompt"></h3><div id="choices"></div><p class="choice-hint">选择会留下不同的心声</p></aside>
       <div id="chapter-flash" class="chapter-flash" aria-hidden="true"><small>第一幕</small><strong>朱门初启</strong></div>
       <section id="dialogue" class="dialogue" aria-label="当前对话">
@@ -64,7 +107,7 @@
 
     <section id="ending" class="ending" hidden aria-label="故事结局">
       <div class="ending-art" aria-hidden="true"></div><div class="ending-paper"></div>
-      <div class="ending-content"><span class="eyebrow">一日将尽 · 此心何寄</span><div class="ending-seal">梦记</div><p id="ending-index" class="ending-index">心境 · 其一</p><h2 id="ending-title"></h2><p id="ending-poem" class="ending-poem"></p><p id="ending-text"></p><div id="ending-memories" class="ending-memories"></div><p class="ending-note">这是这一日的心境，不是红楼故事的终点。</p><div class="ending-actions"><button id="replay" class="primary">再入此梦 <span>↻</span></button><button id="ending-history" class="secondary">回看此行</button><button id="ending-home" class="quiet">返回标题</button></div><p id="ending-collection" class="collection"></p></div>
+      <div class="ending-content"><span class="eyebrow">一日将尽 · 此心何寄</span><div class="ending-seal">梦记</div><p id="ending-index" class="ending-index">心境 · 其一</p><h2 id="ending-title"></h2><p id="ending-poem" class="ending-poem"></p><p id="ending-text"></p><div id="ending-memories" class="ending-memories"></div><p class="ending-note">这是这一日的心境，不是红楼故事的终点。</p><div class="ending-actions"><button id="replay" class="primary">再入此梦 <span>↻</span></button><button id="ending-history" class="secondary">回看此行</button><button id="ending-chapters" class="quiet">回目卷册</button><button id="ending-home" class="quiet">返回标题</button></div><p id="ending-collection" class="collection"></p></div>
     </section>
   </main>
   <dialog id="modal"><div class="modal-heading"><div><span class="eyebrow" id="modal-eyebrow">潇湘初梦</span><h2 id="modal-title"></h2></div><button id="close-modal" class="close" aria-label="关闭弹窗">×</button></div><div id="modal-content"></div></dialog>

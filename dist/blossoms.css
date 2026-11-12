@@ -1,0 +1,15 @@
+/* The second volume keeps the same paper dialogue and celadon stage. */
+.background[data-scene="blossom-night"]{background-image:url('assets/blossom-night.png');filter:brightness(.88) saturate(.8)}
+.background[data-scene="blossom-path"]{background-image:url('assets/blossom-path.png')}
+.background[data-scene="blossom-mound"],.background[data-scene="blossom-poem"]{background-image:url('assets/blossom-mound.png')}
+.background[data-scene="blossom-poem"]{filter:brightness(.88) saturate(.8)}
+#game[data-volume="buried-blossoms"] .scene-wash{background:linear-gradient(180deg,#183b33bd,transparent 24%,transparent 50%,#203e2c4d 85%,#1b342be0)}
+#dialogue[data-verse="true"] .dialogue-body{color:#775c4f}
+#text{white-space:pre-line}
+#ending[data-scene="blossom-mound"] .ending-art{background-image:url('assets/blossom-mound.png')}
+.slot small{max-width:440px}.volume-save-actions{flex-wrap:wrap}
+.volume-save-actions .quiet{font-size:11px}
+.cover h2{letter-spacing:5px}
+
+.scroll-reveal[data-volume="buried-blossoms"] .unrolled-art{background:linear-gradient(90deg,#f2ead880,transparent 35%,#f7f0da),linear-gradient(#f7f0da77,transparent 45%,#eee5cb44),url('assets/blossom-mound.png') 35% 50% / cover}
+.volume-scroll[data-available="true"] .scroll-caption{color:#748664;border-style:solid;border-color:#a0ad8877;background:#f7f6e7cc}

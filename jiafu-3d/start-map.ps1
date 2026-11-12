@@ -1,4 +1,5 @@
 param([switch]$NoBrowser)
+if(Test-Path -LiteralPath (Join-Path $PSScriptRoot '../start-game.ps1')){& (Join-Path $PSScriptRoot '../start-game.ps1') -NoBrowser:$NoBrowser;exit 0}
 $ErrorActionPreference='Stop'
 $mapRoot=$PSScriptRoot
 $cacheFolder=Join-Path $mapRoot '.cache'

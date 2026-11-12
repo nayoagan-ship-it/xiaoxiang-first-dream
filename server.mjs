@@ -4,11 +4,12 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 const root=path.join(path.dirname(fileURLToPath(import.meta.url)),'dist');
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.svg':'image/svg+xml','.webp':'image/webp','.mp3':'audio/mpeg'};
-const port=Number(process.env.PORT||4173);
+const i=process.argv.indexOf('--port'),port=Number(i>=0?process.argv[i+1]:process.env.PORT||4177);
+if(!Number.isInteger(port)||port<1024||port>65535)throw new Error('Invalid local port');
 http.createServer(async(req,res)=>{
   try{
     const pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
-    const target=path.resolve(root,'.'+(pathname==='/'?'/index.html':pathname));
+    const target=path.resolve(root,'.'+(pathname==='/'?'/index.html':pathname.endsWith('/')?pathname+'index.html':pathname));
     if(!target.startsWith(root+path.sep)){res.writeHead(403).end('Forbidden');return;}
     if(!(await stat(target)).isFile())throw new Error('not file');
     res.writeHead(200,{'Content-Type':types[path.extname(target)]||'application/octet-stream','Cache-Control':'no-cache'});res.end(await readFile(target));

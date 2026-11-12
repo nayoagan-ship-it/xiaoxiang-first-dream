@@ -1,4 +1,4 @@
-# 三维贾府漫游 · 青黛宣纸合并版 V11.6
+# 三维贾府漫游 · 完整入口版 V11.7
 
 《潇湘初梦》第一幕“黛玉进贾府”的三维探索模式。本版把青黛宣纸 UI 合入 V11.5 完整游戏：斜俯视镜头下控制方块小黛玉在院落、曲廊、亭台、假山和八间内室中自由探索，交谈时显示对应人物的水彩立绘和纸笺对话。
 
@@ -10,9 +10,9 @@
 
 推荐安装 Node.js 22.12 或更高版本。此目录的 `dist/` 已包含可运行页面，无需先安装 npm 依赖。
 
-在仓库根目录执行 `npm run start:3d`，或在本目录执行 `node server.mjs`，打开 http://127.0.0.1:4177/ 。Windows 也可双击本目录的 `启动贾府漫游.cmd`。
+在仓库根目录执行 `npm start`，打开 http://127.0.0.1:4177/ ，从开始界面“展卷入梦”选择第一卷。Windows 双击根目录 `启动潇湘初梦.cmd`；旧三维启动脚本也会转入完整入口。
 
-[下载合并版即玩包与完整可编辑模型](https://github.com/nayoagan-ship-it/xiaoxiang-first-dream/releases/tag/jiafu-v11.6.0)。即玩包完整解压后双击启动脚本；模型包用于继续编辑，运行游戏只需即玩包。现有公开网址是二维阅读版；三维漫游版使用本机服务运行。
+[下载合并版即玩包与完整可编辑模型](https://github.com/nayoagan-ship-it/xiaoxiang-first-dream/releases/tag/jiafu-v11.7.0)。即玩包完整解压后双击启动脚本；模型包用于继续编辑，运行游戏只需即玩包。公开网址与本地版现使用相同的开始界面和章节入口，第一卷接入三维贾府，第二卷保留黛玉葬花。
 
 ## 本版内容
 
@@ -32,7 +32,7 @@ npm ci
 npm run dev
 ```
 
-开发地址为 http://127.0.0.1:4176/ 。`npm run build` 更新 `dist/`，`npm run check` 检查入口语法，`npm test` 检查方块几何与人物动作。
+开发地址为 http://127.0.0.1:4176/ 。在仓库根目录运行 `npm run build` 更新完整游戏，或在此目录运行 `npm run build` 仅更新三维构建 `dist/`，`npm run check` 检查入口语法，`npm test` 检查方块几何与人物动作。
 
 可选浏览器检查需 Playwright：`npm install --no-save --package-lock=false playwright`、`npx playwright install chromium`。保持开发服务运行后执行 `node tools/check-dialogue-portraits.cjs`。构建版启动后执行 `node tools/check-ui-browser.cjs` 检查三个桌面尺寸、阅读设置、剧情选择、暂停与续读；可通过 `JIAFU_UI_URL` 指向独立测试端口。使用本机浏览器时，可设置 `JIAFU_BROWSER_EXECUTABLE`；复用外部 Playwright 时可设置 `JIAFU_PLAYWRIGHT_PACKAGE` 为其模块路径。
 

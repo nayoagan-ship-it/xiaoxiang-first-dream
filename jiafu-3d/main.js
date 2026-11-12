@@ -23,7 +23,7 @@ document.body.classList.toggle('ui-still',!settings.motion);
 let storageWarned=false,toastTimer=0,dialogue,nearest=null,conversationNpc=null,activeRoom=null,overview=!state.started,waypoints=[],keys=new Set(),time=0,saveClock=0,currentPlace='',isHidden=false;
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
 function toast(text){$('toast').textContent=text;$('toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('show'),3000);}
-function save(){state.x=world.player.root.position.x;state.z=world.player.root.position.z;state.settings=settings;try{localStorage.setItem(storageKey,JSON.stringify(state));}catch{if(!storageWarned){toast('此浏览器未允许保存进度，本次仍可继续漫游。');storageWarned=true;}}}
+function save(){state.x=world.player.root.position.x;state.z=world.player.root.position.z;state.settings=settings;try{localStorage.setItem(storageKey,JSON.stringify(state));if(state.started)localStorage.setItem('xiaoxiang.v1.lastMode',JSON.stringify({mode:'explore',volumeId:'first-dream'}));}catch{if(!storageWarned){toast('此浏览器未允许保存进度，本次仍可继续漫游。');storageWarned=true;}}}
 
 if(![8,9].includes(loaded.worldRevision)){state.x=spawn.x;state.z=spawn.z;}
 const world=createWorld();await world.assetsReady;const navigation=createNavigation(bounds,world.solid,.34,.5,world.groundHeight),scene=new T.Scene();scene.background=new T.Color('#b7bca7');scene.fog=new T.Fog('#b7bca7',105,180);scene.add(world.root);

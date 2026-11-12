@@ -9,11 +9,12 @@
   },
   "scripts": {
     "start": "node server.mjs",
-    "check": "node --check dist/story.js && node --check dist/app.js && node --check server.mjs && node --check tests/flows.cjs",
+    "check": "node --check dist/story.js && node --check dist/story-blossoms.js && node --check dist/app.js && node --check dist/chapters.js && node --check dist/scroll-library.js && node --check server.mjs && node --check tests/flows.cjs",
     "test": "node tests/flows.cjs",
-    "start:3d": "node jiafu-3d/server.mjs",
+    "start:3d": "node server.mjs",
     "check:3d": "npm --prefix jiafu-3d run check",
-    "test:3d": "npm --prefix jiafu-3d test"
+    "test:3d": "npm --prefix jiafu-3d test",
+    "build": "node tools/build-unified.mjs"
   },
   "devDependencies": {
     "jsdom": "26.1.0"

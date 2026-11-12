@@ -1,0 +1,26 @@
+{
+  "status": "passed",
+  "checks": [
+    "restored title and single-author team page",
+    "four physical scroll volumes",
+    "coming-soon chapters cannot start",
+    "classic first volume retained",
+    "primary first volume opens 3D Jiafu",
+    "same-origin return to chapter library",
+    "continue resumes 3D saved choice",
+    "second volume and inner Daiyu retained",
+    "reading and 3D saves remain independent",
+    "cover continues most recently played mode",
+    "three desktop shelf layouts",
+    "actual pickup, untying, cover fold and slow unrolling phases"
+  ],
+  "phases": [
+    "drawing",
+    "untying",
+    "unwrapping",
+    "opening",
+    "open"
+  ],
+  "errors": [],
+  "missing": []
+}

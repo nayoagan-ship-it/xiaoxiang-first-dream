@@ -1,79 +1,33 @@
 # 运行与开发
 
-《潇湘初梦 · 林黛玉进贾府》是面向电脑浏览器的中文第一人称视觉小说。
-运行文件位于 `dist/`，这里的 JavaScript、HTML 和 CSS 本身就是可编辑源码，不依赖打包器。
+V11.7 为完整入口版：原开始界面 → 红楼卷藏 → 初入荣府三维漫游 / 黛玉葬花。已构建游戏位于根目录 `dist/`，三维页面位于 `dist/jiafu/`。
 
-## 开始游戏
+安装 Node.js 22.12 或更高版本后，双击 `启动潇湘初梦.cmd`，或执行 `npm start`，打开 http://127.0.0.1:4177/ 。运行构建版无需安装依赖。`停止潇湘初梦.cmd` 只停止该启动器记录的游戏进程。直接文件方式适合原篇阅读，三维游戏请使用本地 HTTP 服务。
 
-可直接打开根目录的 `开始游戏.html`，或 `dist/index.html`。
-推荐使用 Node.js 本地 HTTP 服务，让浏览器存档有稳定的站点地址：
+## 检查与构建
 
 ```sh
-node server.mjs
-```
-
-也可以运行 `npm start`。然后打开 <http://127.0.0.1:4173>。
-运行游戏与本地服务器无需安装 npm 依赖；开发检查建议 Node.js 20 或更新版本。
-可通过 `PORT` 环境变量修改端口，服务器只监听本机地址。
-
-## 操作
-
-- 点击对话、空格或回车：显示整句或继续。
-- 点击选项，或按数字 1、2、3：作出选择。
-- H：历史回看；A：自动阅读；Esc：关闭弹窗或返回开始界面。
-- 自动存档与三份手动存档保存在当前浏览器的 localStorage，清除站点数据会删除存档。
-- 场景动效和背景乐默认开启，首次点击或按键后开始播放；阅读设置会保存。
-- 五幕故事、八处选择、三种心境结局。剧情分支改变答话、内心独白及最终心境。
-
-建议使用电脑端 Chrome、Edge 或 Firefox，窗口至少 980 × 660。
-本版本保留 2026-10-30 更新的单人创作团队页。
-
-## 编辑入口
-
-| 文件 | 用途 |
-| --- | --- |
-| `dist/story.js` | 剧情、选择、分数与结局判定 |
-| `dist/app.js` | 阅读、存读档、菜单、音乐及设置 |
-| `dist/style.css` | 游戏舞台、人物与基础样式 |
-| `dist/ui.css` | 菜单、对话框及纸笺界面 |
-| `dist/team.css` | 创作团队页面样式 |
-| `dist/assets/` | 场景、立绘、署名头像、图标与配乐 |
-| `ART-PROMPTS.md` | 场景和人物插画的生成提示词 |
-| `tools/compose_bgm.py` | 原创程序配乐的合成脚本 |
-
-修改这些文件后刷新即可，不需要运行构建命令。
-
-## 验证
-
-```sh
-npm ci --ignore-scripts
+npm ci
 npm run check
 npm test
+cd jiafu-3d
+npm ci
+cd ..
+npm run check:3d
+npm run test:3d
+npm run build
 ```
 
-开发依赖仅用于 jsdom 行为测试，并锁定在 package-lock.json。
-现有测试覆盖三种结局、八处选择、文本一致性、手动存读档、覆盖存档取消、刷新续玩、回看、字号和重开保留手动存档。
-jsdom 检查不等同于真实浏览器排版、声音试听和操作手感验证。
+`npm run build` 构建三维源代码，再同步到根目录 `dist/jiafu/`。开始界面、卷册与第二章为原有 HTML/JS/CSS 源文件，直接编辑根目录 `dist/` 中对应文件；三维源代码在 `jiafu-3d/`。
 
-## 重新合成配乐（可选）
+`npm test` 覆盖两卷六种结局、第二卷94节点和6561条选择路径、跨卷梦笺、旧存档与续读。浏览器检查使用 Playwright，可设置 `JIAFU_PLAYWRIGHT_PACKAGE` 与 `JIAFU_BROWSER_EXECUTABLE`，运行 `node tools/check-unified-browser.cjs`；使用 `JIAFU_UNIFIED_URL` 指向运行中的整合版。
 
-当前游戏背景乐由 `dist/app.js` 使用 Web Audio 实时合成，普通使用不需要 Python 或 FFmpeg。
-项目还附带一条程序合成的 MP3 配乐素材，当前播放器没有引用它。
-需要修改配乐时，安装 Python、NumPy 和 FFmpeg，然后运行：
+## 章节与存档
 
-```sh
-python -m pip install numpy
-python tools/compose_bgm.py
-```
+`dist/chapters.js` 配置卷名、简介和完成状态；`dist/scroll-library.js` 保留拿取、松带、封皮翻折和约2.2秒的最后展卷。第一卷主按钮进入三维，原篇阅读入口继续支持旧梦笺；第二卷与未完成卷宗保留。
 
-FFmpeg 默认从 PATH 查找，也可以通过 `FFMPEG_PATH` 指定可执行文件路径。
-脚本会更新 `dist/assets/audio/bamboo-shadows.mp3`；中间 WAV 放在被 Git 忽略的 `artifacts/audio-generation/`。
+阅读进度保存在 `xiaoxiang.v1.*`，三维进度保存在 `xiaoxiang.jiafu3d.v1`，最近游玩模式单独记录。返回卷册和切换章节不会互相覆盖。更换域名、端口或浏览器时不会自动迁移存档。
 
 ## 静态部署
 
-将 `dist/` 内的内容放到静态网站的根目录即可，保持资源相对路径不变。
-本仓库不包含原托管服务的账号配置、部署记录和本地浏览器存档。
-
-## 三维贾府漫游
-
-运行 `npm run start:3d` 启动已构建的三维版。V11.6 将青黛宣纸界面合入 V11.5 完整游戏，继续使用相同的浏览器存档键。源码开发、验证和模型导出见 [jiafu-3d/README.md](jiafu-3d/README.md)。原有二维版的运行与检查命令保持不变。
+将根目录 `dist/` 的全部内容部署到静态网站根目录，包括 `jiafu/` 子目录。保留相对路径，即可从同一网址进入两卷故事和三维场景。完整地图模型沿用V11.5模型包，运行游戏不需要模型包。

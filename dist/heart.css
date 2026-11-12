@@ -1,0 +1,36 @@
+/* Daiyu's inward garden: the same paper, jade and rose, with more breathing room. */
+.background[data-scene="daiyu-heart"]{background-image:url('assets/daiyu-heart.png');filter:none}
+.heart-atmosphere{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 1.6s;overflow:hidden;z-index:-1}
+.heart-mode .heart-atmosphere{opacity:1}
+.heart-mode .scene-wash{background:linear-gradient(180deg,#203d396b,transparent 24%,transparent 65%,#2a443b9c)}
+.heart-mode .scene-note{display:none}
+.heart-label{position:absolute;top:17%;left:11%;color:#526e62;text-shadow:0 1px 9px #fff8e8}
+.heart-label>span{font-size:10px;letter-spacing:5px;color:#8b7e6a}
+.heart-label h3{font:400 clamp(26px,2.4vw,38px)/1.6 var(--serif);letter-spacing:7px;margin:10px 0 6px}
+.heart-label p{font-family:var(--serif);font-size:12px;letter-spacing:3px;color:#7e8c79}
+.heart-mode .portrait-wrap{right:8%;width:40%;height:76%;bottom:11%;transition:opacity 1.2s,transform 1.6s}
+.heart-mode #portrait{filter:drop-shadow(0 4px 18px #e9d9bf55)}
+.heart-mode #portrait-caption{font-size:13px;letter-spacing:5px;color:#637a69;text-shadow:0 1px 10px #fff9e5;right:1%;top:22%}
+.heart-mode .portrait-wrap:after{background:linear-gradient(0deg,#ece7d651,transparent);height:10%}
+.heart-mode .dialogue{background:radial-gradient(ellipse at 98% 100%,#e5c7c341,transparent 45%),linear-gradient(130deg,#fffaf0f5,#eff2e5f2);border-color:#fffbf3;box-shadow:0 18px 60px #29493c2e,inset 0 1px 0 #fff}
+.heart-mode .speaker-strip h3{background:linear-gradient(125deg,#647c6d,#476657)}
+.heart-mode .speaker-strip #speaker-kind{color:#9e7b78;background:#fff7ee}
+.heart-mode .choice-panel{background:linear-gradient(130deg,#fffaf2f7,#eef0e1f2);border-color:#fff8e8}
+.heart-mode .choice-eyebrow{color:#a77979}
+.heart-mode #choices button{border-color:#acb59b63}
+.heart-mode #choices button:hover{background:#e7ecdf}
+.heart-mode .choice-active .dialogue{opacity:.96}
+.heart-mode.choice-active .heart-label{display:none}
+.heart-mode .game-footer>span{color:#e6e6d3}
+.heart-mist{position:absolute;inset:20% -20% -25%;background:radial-gradient(ellipse at 35% 60%,#fffbea44,transparent 55%),radial-gradient(ellipse at 70% 90%,#e6eedd66,transparent 60%);animation:heart-drift 20s ease-in-out infinite alternate}
+.heart-ripples{position:absolute;width:260px;height:80px;left:28%;top:55%}
+.heart-ripples i{position:absolute;inset:0;border:1px solid #f9f3da99;border-radius:50%;animation:heart-ripple 9s ease-out infinite;opacity:0}
+.heart-ripples i:nth-child(2){animation-delay:3s}.heart-ripples i:nth-child(3){animation-delay:6s}
+#heart-threshold{position:absolute;inset:0;z-index:7;pointer-events:none;opacity:0;background:radial-gradient(ellipse at 60% 50%,#fff9e9,#dce6d7)}
+@keyframes heart-drift{from{transform:translateX(-3%)}to{transform:translateX(3%)}}
+@keyframes heart-ripple{0%{transform:scale(.3);opacity:0}18%{opacity:.65}100%{transform:scale(1.7);opacity:0}}
+body.reduced-motion .heart-atmosphere,body.reduced-motion .heart-mode .portrait-wrap{transition:none}
+body.reduced-motion .heart-mist,body.reduced-motion .heart-ripples i{animation:none}
+@media(max-height:800px){.heart-label{top:16%;left:11%}.heart-label h3{font-size:28px;margin-top:7px}.heart-mode .portrait-wrap{height:76%;bottom:11%}}
+@media(max-height:700px){.heart-label{top:17%}.heart-label h3{font-size:25px}.heart-label p{font-size:11px}.heart-mode .portrait-wrap{right:6%;width:42%;height:76%}}
+@media(prefers-reduced-motion:reduce){.heart-atmosphere,.heart-mode .portrait-wrap{transition:none}.heart-mist,.heart-ripples i{animation:none}}

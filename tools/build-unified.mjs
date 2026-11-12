@@ -1,0 +1,15 @@
+import {spawnSync} from 'node:child_process';
+import {cpSync,rmSync,realpathSync} from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import assert from 'node:assert/strict';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const game=path.join(root,'jiafu-3d');
+const built=spawnSync(process.execPath,[path.join(game,'node_modules/vite/bin/vite.js'),'build'],{cwd:game,stdio:'inherit',windowsHide:true});
+if(built.status!==0)process.exit(built.status||1);
+const destination=path.resolve(root,'dist/jiafu');
+assert.equal(path.dirname(destination),realpathSync(path.join(root,'dist')));
+assert.equal(path.basename(destination),'jiafu');
+rmSync(destination,{recursive:true,force:true});
+cpSync(path.join(game,'dist'),destination,{recursive:true});
+console.log('Unified game: title → scroll library → Jiafu / buried blossoms');

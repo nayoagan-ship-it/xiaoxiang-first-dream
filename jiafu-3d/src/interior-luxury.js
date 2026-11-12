@@ -1,6 +1,6 @@
 import * as T from 'three';
 
-export const atlasPath='/assets/interiors-v8/luxury-atlas.png';
+export const atlasPath='./assets/interiors-v8/luxury-atlas.png';
 export function prepareLuxuryMaterials(a){
  const regions={silk:[.004,.004,.325,.492],rosecloth:[.337,.004,.325,.492],quilt:[.671,.004,.325,.492],cushion:[.337,.004,.325,.492],'screen-art':[.004,.504,.992,.492]};
  const colors={gilding:'#bd9557',cobalt:'#35566e',lacquer:'#79392e','screen-art':'#3c3126','lamp-paper':'#ead8b5'};
