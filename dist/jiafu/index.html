@@ -1,6 +1,6 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="application-name" content="Jiafu3D"><meta name="theme-color" content="#314f43"><title>潇湘初梦 · 贾府漫游</title><meta name="description" content="以黛玉之眼，走入一座可自由探索的3D贾府。朱门、回廊、池园与一日初逢。"><link rel="icon" href="./assets/flower.svg">  <script type="module" crossorigin src="./assets/index-CPrIipDN.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-TRhZLewn.css">
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="application-name" content="Jiafu3D"><meta name="theme-color" content="#314f43"><title>潇湘初梦 · 贾府漫游</title><meta name="description" content="以黛玉之眼，走入一座可自由探索的3D贾府。朱门、回廊、池园与一日初逢。"><link rel="icon" href="./assets/flower.svg">  <script type="module" crossorigin src="./assets/index-DUAkjYUO.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-7PfvdMeL.css">
 </head>
 <body>
 <svg class="ui-symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
@@ -27,7 +27,7 @@
  <aside class="mini-map paper-panel" aria-label="荣府小记">
   <div class="map-heading"><div><small>一方天地</small><span>荣府小记</span></div><button id="map-open" aria-label="展开地图" title="展开地图 · M"><svg class="ui-icon" aria-hidden="true"><use href="#icon-expand"/></svg></button></div>
   <div class="map-frame"><canvas id="mini-map" width="264" height="220" aria-label="贾府地图及黛玉所在位置，点击展开"></canvas><span class="map-north" aria-hidden="true">北 ↑</span></div>
-  <p><i></i> 黛玉 <span id="discover-count">发现 0 / 14</span></p><progress id="discovery-progress" value="0" max="14" aria-label="探索发现进度"></progress>
+  <p><i></i> 黛玉 <span id="map-target-key"><b aria-hidden="true">✦</b> 去处</span><span id="discover-count">发现 0 / 14</span></p><progress id="discovery-progress" value="0" max="14" aria-label="探索发现进度"></progress>
  </aside>
  <div id="interaction" class="interaction" hidden><span id="interact-kind">查看</span><strong id="interact-name"></strong><button id="interact-button"><kbd>E</kbd> <span>轻声相问</span></button></div>
  <footer class="bottom-bar"><div class="player-badge"><img src="./assets/flower.svg" alt=""><span>林黛玉<small>此间初来，步步留心</small></span></div><p><span><kbd>W A S D</kbd> 行走</span><i>·</i><span>点击地面寻路</span><i>·</i><span><kbd>E</kbd> 交互</span><i>·</i><span>滚轮缩放</span></p><button id="recenter"><svg class="ui-icon" aria-hidden="true"><use href="#icon-compass"/></svg>回到黛玉</button></footer>

@@ -87,6 +87,8 @@ function updateHUD(){
  $('step-hall').textContent=state.complete?'此梦已记':'随心游府';$('step-hall').classList.toggle('done',state.complete);
  $('quest-guide').hidden=state.complete;$('quest-guide').lastChild.textContent=activeClueId?'查看记下的去处':'顺着话头，记下去处';
  readyPeople=new Set(objective.ready.map(s=>s.npc));for(const {e,npc}of npcLabels)e.classList.toggle('story-ready',readyPeople.has(npc.id));
+ $('map-target-key').hidden=!objective.ready.length;
+ $('mini-map').setAttribute('aria-label','贾府地图，圆点为黛玉'+(objective.ready.length?'，金色星芒为当前去处：'+objective.ready.map(s=>world.npcs.find(n=>n.id===s.npc).name).join('、'):'，当前相逢已全部完成')+'。点击展开地图');
  $('discover-count').textContent=`发现 ${state.discoveries.length} / ${world.interact.length}`;$('discovery-progress').max=world.interact.length;$('discovery-progress').value=state.discoveries.length;
 }
 function navigate(x,z){if(blocked())return;const path=navigation.route(world.player.root.position.x,world.player.root.position.z,x,z);if(!path.length){toast('这处暂不便落脚，试试旁边的石径。');return;}waypoints=path;targetRing.position.set(path.at(-1).x,world.groundHeight(path.at(-1).x,path.at(-1).z)+.06,path.at(-1).z);targetRing.visible=true;}
@@ -129,8 +131,22 @@ function help(){const body=showModal('漫游与阅读');body.innerHTML='<p>不�
 }
 $('help-open').onclick=help;
 const mapCanvas=$('mini-map'),mapContext=mapCanvas.getContext('2d');
+// Keep the star and its halo the same screen size when the desktop map resizes.
+let mapPixels={x:1,y:1};
+const mapResize=new ResizeObserver(()=>{mapPixels={x:mapCanvas.width/mapCanvas.clientWidth,y:mapCanvas.height/mapCanvas.clientHeight};});mapResize.observe(mapCanvas);
+function drawMapTarget(c,x,y,pixels,big,selected){
+ const moving=!big&&settings.motion&&!reducedMotion.matches,pulse=moving?(1-Math.cos(time*Math.PI*2/2.4))/2:.45;
+ const core=big?5:selected?4:3.5,halo=(big?12:selected?10:8)+pulse*2,ring=core+2+pulse*2;
+ c.save();c.translate(x,y);c.scale(pixels.x,pixels.y);
+ const glow=c.createRadialGradient(0,0,core,0,0,halo);glow.addColorStop(0,`rgba(246,207,119,${.34+pulse*.18})`);glow.addColorStop(1,'rgba(246,207,119,0)');
+ c.fillStyle=glow;c.beginPath();c.arc(0,0,halo,0,Math.PI*2);c.fill();
+ c.strokeStyle=`rgba(166,115,49,${.38+pulse*.24})`;c.lineWidth=1;c.beginPath();c.arc(0,0,ring,0,Math.PI*2);c.stroke();
+ c.beginPath();for(let i=0;i<8;i++){const angle=i*Math.PI/4-Math.PI/2,r=i%2?core*.4:core;const px=Math.cos(angle)*r,py=Math.sin(angle)*r;i?c.lineTo(px,py):c.moveTo(px,py);}c.closePath();
+ c.fillStyle='#bd8b37';c.strokeStyle='#fff8df';c.lineWidth=1.15;c.lineJoin='round';c.stroke();c.fill();c.restore();
+}
 function drawMap(canvas,big=false){
  const c=canvas.getContext('2d'),w=canvas.width,h=canvas.height,pad=big?24:10,s=Math.min((w-pad*2)/76,(h-pad*2)/63),ox=(w-76*s)/2,oz=(h-63*s)/2;
+ const pixels=big?{x:w/canvas.clientWidth,y:h/canvas.clientHeight}:mapPixels;
  const point=(x,z)=>[ox+(x+38)*s,oz+(z+31)*s];
  c.fillStyle='#e6e6d6';c.fillRect(0,0,w,h);c.fillStyle='#bcc9a4';c.fillRect(ox,oz,76*s,63*s);
  c.fillStyle='#ddd4bc';for(const r of world.mapData.paving){const[x,z]=point(r.x-r.w/2,r.z-r.d/2);c.fillRect(x,z,r.w*s,r.d*s);}
@@ -142,10 +158,9 @@ function drawMap(canvas,big=false){
  c.fillStyle='#a6ab93';for(const o of world.solid){if(!o.enabled||o.id?.startsWith('water')||o.w>4&&o.d>4)continue;const[x,z]=point(o.x-o.w/2,o.z-o.d/2);c.fillRect(x,z,Math.max(.7,o.w*s),Math.max(.7,o.d*s));}
  if(big){c.font='17px SimSun';c.textAlign='center';c.fillStyle='#3d5c47';for(const p of places){const[x,z]=point(p.x,p.z);c.fillStyle='#fff9e7dc';c.fillRect(x-49,z-14,98,26);c.fillStyle='#42604b';c.fillText(p.name,x,z+5);}}
  for(const stage of readyStages(state)){
-  if(!big&&activeClueId!==stage.id)continue;
   const npc=world.npcs.find(n=>n.id===stage.npc),[nx,nz]=point(npc.x,npc.z);
-  c.fillStyle='#fff7e4';c.strokeStyle='#ac705d';c.lineWidth=big?2:1.5;c.beginPath();c.arc(nx,nz,big?7:4,0,Math.PI*2);c.fill();c.stroke();
-  if(big){c.font='13px SimSun';c.textAlign='center';c.fillStyle='#7f513f';c.fillText(npc.name,nx,nz-11);}
+  drawMapTarget(c,nx,nz,pixels,big,activeClueId===stage.id);
+  if(big){c.font='13px SimSun';c.textAlign='center';c.fillStyle='#7f513f';c.fillText(npc.name,nx,nz-16*pixels.y);}
  }
  const[x,z]=point(world.player.root.position.x,world.player.root.position.z);c.fillStyle='#a7654d';c.beginPath();c.arc(x,z,big?6:3.5,0,Math.PI*2);c.fill();c.strokeStyle='#fff4db';c.lineWidth=big?2:1;c.stroke();
  return {s,ox,oz};
