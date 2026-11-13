@@ -214,3 +214,20 @@ body.ui-still *,body.ui-still *:before,body.ui-still *:after{animation:none!impo
  .interaction{bottom:89px}.memory-echo{top:16%;right:3.7%}
 }
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Conversation leaves a place to visit; clues remain optional. */
+.quest-guide{display:flex;align-items:center;gap:8px;width:100%;margin-top:15px;padding:10px 0 0;border-top:1px solid var(--fine-line);color:#6d805e;font-size:10px;letter-spacing:1px;text-align:left}
+.quest-guide:hover{color:#9c7053}.quest-guide .ui-icon{width:15px;height:15px}
+.quest h2{text-wrap:balance}
+.npc-label.story-ready{border-color:#e2c48bbd;background:#526247ed;color:#fff0c5;box-shadow:0 3px 12px #52442a2b}
+.npc-label.story-ready:before{content:'❀';font-size:10px;margin-right:5px;color:#e7c3a4}
+.journey-clue{padding:18px 20px;margin:13px 0;border:1px solid #b6bc9b4d;border-radius:23px 15px;background:#e8ecd83d}
+.journey-clue h3{font:21px/1.5 var(--serif);letter-spacing:2px;margin-bottom:4px}
+.journey-clue>small{display:block;font-size:10px;letter-spacing:1px;color:#9d8463;margin-bottom:12px}
+#modal-body .journey-clue p{font-size:14px;margin-bottom:13px}
+.journey-clue>div{display:flex;gap:12px}.journey-clue button{border:1px solid #a3b18d5e;border-radius:14px;padding:9px 13px;font-size:11px;color:#50714e;background:#e0e7d451}
+.journey-clue button:hover{background:#dce6cf}.journey-clue button:last-child{background:#4c6c50;color:#fff3d9;border-color:#4c6c50}
+#modal-body .journey-current{padding:15px 18px;border-left:2px solid #b99b65;background:#e9ead94d;border-radius:4px 16px 16px 4px;font:14px/1.9 var(--serif);color:#7e7d60}
+.journey-entry{border-left:2px solid #a9b48e!important}
+.overview-mode .quest .quest-guide{display:none}
+@media(max-height:700px){.quest-guide{margin-top:10px;padding-top:9px;font-size:9px}.quest #quest-steps{gap:12px}.quest h2{font-size:19px;letter-spacing:1px}}

@@ -8,8 +8,8 @@
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1 --port 4176 --strictPort",
     "verify:tools": "node tools/verify-toolchain.mjs",
-    "check": "node --check main.js && node --check src/dialogue.js && node --check src/dialogue-portraits.js",
-    "test": "node tools/check-block-geometry.mjs && node tools/check-character-motion.mjs"
+    "check": "node --check main.js && node --check src/dialogue.js && node --check src/dialogue-portraits.js && node --check src/exploration-story.js",
+    "test": "node tools/check-block-geometry.mjs && node tools/check-character-motion.mjs && node tools/check-exploration.mjs"
   },
   "dependencies": {
     "three": "0.187.0"

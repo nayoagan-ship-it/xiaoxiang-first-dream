@@ -1,0 +1,28 @@
+{
+  "status": "passed",
+  "visits": [
+    "reception",
+    "fengjie",
+    "tanchun",
+    "yingchun",
+    "xichun",
+    "wang",
+    "baoyu",
+    "settle"
+  ],
+  "checks": [
+    "actual walking to grandmother",
+    "future NPC does not skip story",
+    "paused branch and reload keep choice scores once",
+    "sisters visited in free order",
+    "tea door and actual room entry",
+    "actual climb to 5.6m pavilion",
+    "actual zigzag bridge crossing",
+    "only finish after all nine encounters",
+    "journal keeps each conversation",
+    "free walking and persistence after completion",
+    "V11.7 old position, scores, discoveries and door states retained"
+  ],
+  "errors": [],
+  "missing": []
+}

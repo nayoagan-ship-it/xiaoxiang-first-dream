@@ -1,10 +1,10 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const {chromium}=require('./browser-runtime.cjs');
-const out=path.resolve(__dirname,'../outputs/ui-beautify-v12');fs.mkdirSync(out,{recursive:true});
+const out=process.env.JIAFU_QA_OUTPUT||path.resolve(__dirname,'../outputs/ui-beautify-v12');fs.mkdirSync(out,{recursive:true});
 const errors=[],failed=[],layouts=[];
 async function inBounds(page,selector){const b=await page.locator(selector).boundingBox(),size=page.viewportSize();assert(b,selector+' visible');assert(b.x>=-1&&b.y>=-1&&b.x+b.width<=size.width+1&&b.y+b.height<=size.height+1,selector+' within '+size.width+'x'+size.height);return b;}
 async function frame(page,file){await page.screenshot({path:path.join(out,file)});}
-async function ready(page){await page.goto(process.env.JIAFU_UI_URL||'http://127.0.0.1:4177/');await page.waitForFunction(()=>document.body.dataset.ready==='true');}
+async function ready(page){await page.goto(process.env.JIAFU_UI_URL||'http://127.0.0.1:4177/jiafu/index.html');await page.waitForFunction(()=>document.body.dataset.ready==='true');}
 (async()=>{const browser=await chromium.launch({executablePath:process.env.JIAFU_BROWSER_EXECUTABLE,headless:true});try{
  const context=await browser.newContext({viewport:{width:1600,height:1000},reducedMotion:'reduce'});
  await context.addInitScript(()=>{if(!localStorage.getItem('xiaoxiang.jiafu3d.v1'))localStorage.setItem('xiaoxiang.v1.settings',JSON.stringify({music:false,motion:false,speed:0}));});
@@ -38,10 +38,11 @@ async function ready(page){await page.goto(process.env.JIAFU_UI_URL||'http://127
  await page.reload();await page.waitForFunction(()=>document.body.dataset.ready==='true');assert(!(await page.locator('#dialogue-layer').isVisible()));assert.equal(await page.locator('#intro').isVisible(),false);await page.keyboard.press('e');assert((await page.locator('#dialogue-text').textContent()).includes('外祖母'));await page.locator('#dialogue-next').click();assert(!(await page.locator('#dialogue-layer').isVisible()));
  assert.equal(await page.locator('#discovery-progress').getAttribute('max'),'22');
  await page.setViewportSize({width:1600,height:1000});await page.locator('#help-open').click();await page.getByRole('switch',{name:'场景动效'}).check();assert.equal(await page.locator('.intro').evaluate(e=>getComputedStyle(e).animationName),'none','system reduced motion respected');await page.locator('#modal-close').click();
- const {dialoguePortraits}=await import('../src/dialogue-portraits.js'),gameURL=process.env.JIAFU_UI_URL||'http://127.0.0.1:4177/';
+ const {dialoguePortraits}=await import('../src/dialogue-portraits.js'),gameURL=process.env.JIAFU_UI_URL||'http://127.0.0.1:4177/jiafu/index.html';
  for(const person of dialoguePortraits){const response=await fetch(new URL(person.src,gameURL));assert.equal(response.status,200);assert.deepEqual(Buffer.from(await response.arrayBuffer()),fs.readFileSync(path.resolve(__dirname,'../public',person.src)));}
- for(const person of [{id:'baoyu',x:8,z:5.5},{id:'wang',x:.5,z:-10}]){
-  const old=await browser.newContext({viewport:{width:1440,height:900}});await old.addInitScript(person=>localStorage.setItem('xiaoxiang.jiafu3d.v1',JSON.stringify({version:1,worldRevision:9,x:person.x,z:person.z,started:true,arrived:true,complete:true,settings:{speed:0,music:false,motion:false,memories:true}})),person);
+ const {npcSpecs}=await import('../src/character-roster.js'),{journeyStages}=await import('../src/exploration-story.js');
+ for(const person of ['baoyu','wang'].map(id=>({id,...npcSpecs.find(n=>n.id===id).approach}))) {
+  const old=await browser.newContext({viewport:{width:1440,height:900}});await old.addInitScript(person=>localStorage.setItem('xiaoxiang.jiafu3d.v1',JSON.stringify({version:1,worldRevision:9,x:person.x,z:person.z,started:true,arrived:true,complete:true,journeyRevision:1,journeyDone:['gate','reception','fengjie','yingchun','xichun','tanchun','wang','baoyu','settle'],settings:{speed:0,music:false,motion:false,memories:true}})),person);
   const p=await old.newPage();p.on('pageerror',e=>errors.push(e.message));await ready(p);assert(!(await p.locator('#intro').isVisible()));await p.keyboard.press('e');await p.waitForFunction(id=>{const image=document.getElementById('dialogue-portrait');return !image.hidden&&image.dataset.person===id&&image.naturalWidth>0;},person.id);await p.locator('#dialogue-next').click();await p.waitForFunction(()=>{const image=document.getElementById('dialogue-portrait');return !image.hidden&&image.dataset.person==='daiyu'&&image.naturalWidth>0;});await p.locator('#dialogue-pause').click();assert(await p.locator('#dialogue-portrait').isHidden());await old.close();
  }
  assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);
