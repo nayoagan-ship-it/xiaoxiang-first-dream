@@ -47,7 +47,7 @@ const npcLabels=world.npcs.map(npc=>{const e=document.createElement('div');e.cla
 const playerLabel=document.createElement('div');playerLabel.className='npc-label main';playerLabel.textContent='黛玉';$('npc-labels').append(playerLabel);
 
 function discover(id){if(!world.interact.some(i=>i.id===id)||state.discoveries.includes(id))return;state.discoveries.push(id);toast('手记添一笔 · '+world.interact.find(i=>i.id===id).name);updateHUD();save();}
-dialogue=createDialogue({state,settings,save,onFinish(tag){
+dialogue=createDialogue({state,settings,save,getPartner:()=>conversationNpc?.name||null,onFinish(tag){
  let finished=tag==='intro'?'gate':tag?.startsWith('walk:')?tag.slice(5):null;
  if(finished&&finishJourneyStage(state,finished)){
   if(activeClueId===finished)activeClueId=null;
@@ -74,6 +74,7 @@ function talk(npc){
 }
 function interact(){if(blocked())return;updateInteraction();if(!nearest)return;waypoints=[];targetRing.visible=false;
  if(nearest.role){talk(nearest);return;}
+ conversationNpc=null;
  if(nearest.kind==='door'){const door=world.doors.find(d=>d.id===nearest.id);door.open=!door.open;door.collider.enabled=!door.open;state.doors[door.id]=door.open;toast(door.open?'茶房门轻轻推开了。':'我将门轻轻掩好。');discover(nearest.id);save();return;}
  if(nearest.kind==='collect'&&!state.petal){state.petal=true;nearest.visual.visible=false;}
  const text=nearest.kind==='collect'&&state.discoveries.includes(nearest.id)?'袖中的落花安静地贴着衣襟。我不必再多取一片，这一点初来的春意，已足够记下。':nearest.text;
