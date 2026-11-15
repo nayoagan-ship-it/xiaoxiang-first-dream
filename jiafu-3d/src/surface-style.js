@@ -1,12 +1,16 @@
 import * as T from 'three';
 
-// Fine world-space surface variation avoids downloaded textures and stays crisp at any map scale.
+// Derivative filtering removes sub-pixel grain instead of letting it shimmer when the camera moves.
 export function heritageSurface(material,kind){
  material.onBeforeCompile=shader=>{
   shader.vertexShader='varying vec3 vHeritagePosition;\n'+shader.vertexShader.replace('#include <worldpos_vertex>','#include <worldpos_vertex>\nvHeritagePosition=(modelMatrix*vec4(transformed,1.0)).xyz;');
-  const pattern=kind==='wood'?'sin(vHeritagePosition.y*4.0+sin(vHeritagePosition.x*28.0+vHeritagePosition.z*24.0)*2.4)':kind==='roof'?'sin(vHeritagePosition.y*31.0)*sin((vHeritagePosition.x+vHeritagePosition.z)*5.0)':'sin(vHeritagePosition.x*29.0+vHeritagePosition.z*37.0)*sin(vHeritagePosition.y*43.0+vHeritagePosition.x*19.0)';
-  shader.fragmentShader='varying vec3 vHeritagePosition;\n'+shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>\nfloat heritageGrain=${pattern};\ndiffuseColor.rgb*=1.0+heritageGrain*${kind==='wood'?'0.055':kind==='roof'?'0.025':'0.022'};`);
- };material.customProgramCacheKey=()=>`heritage-v4-${kind}`;return material;
+  const pattern=kind==='wood'?'heritageWave(vHeritagePosition.y*4.0+heritageWave(vHeritagePosition.x*28.0+vHeritagePosition.z*24.0)*2.4)':kind==='roof'?'heritageWeave(vec2(vHeritagePosition.y*31.0,(vHeritagePosition.x+vHeritagePosition.z)*5.0))':'heritageWeave(vec2(vHeritagePosition.x*29.0+vHeritagePosition.z*37.0,vHeritagePosition.y*43.0+vHeritagePosition.x*19.0))';
+  const filter=`varying vec3 vHeritagePosition;
+float heritageWave(float phase){return sin(phase)*(1.0-smoothstep(0.65,2.4,fwidth(phase)));}
+float heritageWeave(vec2 phase){float bandwidth=fwidth(phase.x)+fwidth(phase.y);return sin(phase.x)*sin(phase.y)*(1.0-smoothstep(0.8,2.8,bandwidth));}
+`;
+  shader.fragmentShader=filter+shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>\nfloat heritageGrain=${pattern};\ndiffuseColor.rgb*=1.0+heritageGrain*${kind==='wood'?'0.055':kind==='roof'?'0.025':'0.022'};`);
+ };material.customProgramCacheKey=()=>`heritage-v5-filtered-${kind}`;return material;
 }
 
 export function contactShadowGeometry(){

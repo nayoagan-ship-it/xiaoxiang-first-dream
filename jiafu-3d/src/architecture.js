@@ -2,6 +2,7 @@ import * as T from 'three';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {heritageSurface,contactShadowGeometry} from './surface-style.js';
 import {characterClearance} from './collision.js';
+import {setCutawayOpacity} from './render-stability.js';
 
 // Shared, batched geometry keeps a densely planted miniature affordable to draw.
 export function createArchitecture(root,solid,roofs){
@@ -23,16 +24,18 @@ export function createArchitecture(root,solid,roofs){
  const box=(x,y,z,w,h,d,m='ivory',ry=0,parent)=>mesh(cube,typeof m==='string'?mats[m]:m,x,y,z,w,h,d,ry,parent);
  function beam(a,b,w,m='wood',parent){const aa=new T.Vector3(...a),bb=new T.Vector3(...b),dir=bb.clone().sub(aa);const geo=new T.BoxGeometry(w,dir.length(),w);geo.applyQuaternion(new T.Quaternion().setFromUnitVectors(new T.Vector3(0,1,0),dir.normalize()));return mesh(geo,typeof m==='string'?mats[m]:m,...aa.add(bb).multiplyScalar(.5).toArray(),1,1,1,0,parent);}
  function obstacle(x,z,w,d,id='',options={}){const o={x,z,w,d,id,enabled:true,...options};solid.push(o);return o;}
- function compact(group){const batches=new Map();for(const o of group.children){if(!o.isMesh)continue;o.updateMatrix();const key=o.material.uuid;if(!batches.has(key))batches.set(key,{material:cloneMaterial(o.material),geos:[]});batches.get(key).geos.push((o.geometry.index?o.geometry.toNonIndexed():o.geometry.clone()).applyMatrix4(o.matrix));}group.clear();for(const entry of batches.values()){entry.material.transparent=true;const m=new T.Mesh(mergeGeometries(entry.geos,false),entry.material);m.castShadow=true;m.receiveShadow=true;group.add(m);entry.geos.forEach(g=>g.dispose());}return [...batches.values()].map(e=>e.material);}
- function fader(group,rect){roofs.push({group,rect,materials:compact(group)});return group;}
+ function compact(group){const batches=new Map();for(const o of group.children){if(!o.isMesh)continue;o.updateMatrix();const key=o.material.uuid;if(!batches.has(key))batches.set(key,{material:cloneMaterial(o.material),geos:[]});batches.get(key).geos.push((o.geometry.index?o.geometry.toNonIndexed():o.geometry.clone()).applyMatrix4(o.matrix));}group.clear();for(const entry of batches.values()){entry.material.forceSinglePass=true;const m=new T.Mesh(mergeGeometries(entry.geos,false),entry.material);m.castShadow=true;m.receiveShadow=true;group.add(m);entry.geos.forEach(g=>g.dispose());}return [...batches.values()].map(e=>e.material);}
+ function fader(group,rect){const materials=compact(group);materials.forEach(m=>setCutawayOpacity(m,1));roofs.push({group,rect,materials,cutaway:false});return group;}
  function wall(x,z,w,d,{height=1.9,base=.12,collide=true,material='ivory',parent}={}){
-  box(x,base+height/2,z,w,height,d,material,0,parent);box(x,base+height+.06,z,w+.12,.12,d+.15,'roof',0,parent);box(x,base+.18,z,w,.34,d+.1,'stone',0,parent);
+  box(x,base+(height+.35)/2,z,w,height-.35,d,material,0,parent);box(x,base+height+.06,z,w+.12,.12,d+.15,'roof',0,parent);box(x,base+.18,z,w,.34,d+.1,'stone',0,parent);
   if(collide)obstacle(x,z,w+.12,d+.15,'wall',{shape:'box',clearance:characterClearance.body,kind:'building'});
   if(!parent)contactShadow(x,z,w+.9,d+.9,base+.035);
  }
  function wallGaps(axis,pos,start,end,gaps,options={}){let cursor=start;for(const[a,b]of [...gaps,[end,end]]){if(a>cursor)axis==='x'?wall(pos,(a+cursor)/2,.32,a-cursor,options):wall((a+cursor)/2,pos,a-cursor,.32,options);cursor=b;}}
  function paving(x,z,w,d,{y=.12,tile=1.5,edge=true}={}){
-  box(x,y-.12,z,w,.2,d,'stone');for(let xx=x-w/2+tile/2;xx<x+w/2;xx+=tile)for(let zz=z-d/2+tile/2;zz<z+d/2;zz+=tile){const shade=((Math.floor(xx*5+zz*3)%3)+3)%3;box(xx,y-.005,zz,Math.min(tile-.045,x+w/2-xx+tile/2),.045,Math.min(tile-.045,z+d/2-zz+tile/2),mat('pave'+shade,['#d7ceba','#dcd3bd','#cdc7b1'][shade]));}
+  box(x,y-.12,z,w,.2,d,'stone');
+  // Adjacent/overlapping courtyards share cell boundaries and the same material at every world position.
+  for(let gx=Math.floor((x-w/2)/tile);gx<Math.ceil((x+w/2)/tile);gx++)for(let gz=Math.floor((z-d/2)/tile);gz<Math.ceil((z+d/2)/tile);gz++){const left=Math.max(x-w/2,gx*tile+.0225),right=Math.min(x+w/2,(gx+1)*tile-.0225),front=Math.max(z-d/2,gz*tile+.0225),back=Math.min(z+d/2,(gz+1)*tile-.0225);if(right<=left||back<=front)continue;const shade=((gx*5+gz*7)%3+3)%3;box((left+right)/2,y-.005,(front+back)/2,right-left,.045,back-front,mat('pave'+shade,['#d7ceba','#dcd3bd','#cdc7b1'][shade]));}
   if(edge){for(const s of[-1,1]){box(x,y+.015,z+s*d/2,w+.18,.07,.14,'stone');box(x+s*w/2,y+.015,z,.14,.07,d,'stone');}}
  }
  function path(points,width=2.2,y=.13){for(let i=1;i<points.length;i++){const[a,b]=[points[i-1],points[i]],dx=b[0]-a[0],dz=b[1]-a[1],length=Math.hypot(dx,dz),n=Math.ceil(length/1.3);for(let j=0;j<n;j++){const t=(j+.5)/n,x=a[0]+dx*t,z=a[1]+dz*t,yy=typeof y==='function'?y(x,z):y;box(x,yy-.02,z,width,.08,length/n-.04,'stone',Math.atan2(dx,dz));}}}

@@ -41,11 +41,12 @@ export function buildTerrain(a,mapData){
    const indices=[];for(let j=0;j<rings-1;j++)for(let i=0;i<n;i++){const k=j*n+i,next=j*n+(i+1)%n;indices.push(k,k+n,next,next,k+n,next+n);}
    const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(positions,3));g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setIndex(indices);g.computeVertexNormals();mesh(g,mat('rock-hill-strata','#b4b5a3'),0,0,0);
   }else{
-   box(r.x,(r.y+.05)/2,r.z,r.w,r.y-.05,r.d,'stone');
+   // Stop the pedestal below its cap: their old coincident top faces fought for depth.
+   box(r.x,(r.y-.17)/2,r.z,r.w,r.y-.27,r.d,'stone');
    for(let y=.42;y<r.y-.15;y+=.48){for(const s of[-1,1]){box(r.x,y,r.z+s*r.d/2,r.w,.025,.03,mat('terrace-joint','#a7a08e'));box(r.x+s*r.w/2,y,r.z,.03,.025,r.d,'terrace-joint');}}
   }
   box(r.x,r.y-.11,r.z,r.w+.05,.22,r.d+.05,r.natural?'stone':'ivory');
-  box(r.x,r.y-.025,r.z,r.w-.1,.045,r.d-.1,r.natural||r.id==='court'||r.id==='hall'?'stone':'grass');
+  box(r.x,r.y-.0165,r.z,r.w-.1,.045,r.d-.1,r.natural||r.id==='court'||r.id==='hall'?'stone':'grass');
   if(r.id!=='court'){
    rail([r.x-r.w/2,r.z+r.d/2],[r.x+r.w/2,r.z+r.d/2],r.y,{wood:r.natural});
    if(r.natural){rail([r.x-r.w/2,r.z-r.d/2],[r.x-r.w/2,r.z+r.d/2],r.y,{wood:true});rail([r.x+r.w/2,r.z-r.d/2],[r.x+r.w/2,r.z+r.d/2],r.y,{wood:true});}

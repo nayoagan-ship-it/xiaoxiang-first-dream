@@ -42,6 +42,8 @@ npm run dev
 
 可选浏览器检查需 Playwright：`npm install --no-save --package-lock=false playwright`、`npx playwright install chromium`。保持开发服务运行后执行 `node tools/check-exploration-browser.cjs`。`npm test` 另覆盖全部六种姊妹顺序与连续通行；浏览器检查默认开发端口4176，可用 `JIAFU_EXPLORATION_URL` 更改。构建版启动后执行 `node tools/check-ui-browser.cjs` 检查三个桌面尺寸、阅读设置、剧情选择、暂停与续读；可通过 `JIAFU_UI_URL` 指向独立测试端口。使用本机浏览器时，可设置 `JIAFU_BROWSER_EXECUTABLE`；复用外部 Playwright 时可设置 `JIAFU_PLAYWRIGHT_PACKAGE` 为其模块路径。
 
+渲染回归检查：开发服务运行在 4186 时执行 `node tools/check-render-browser.cjs`，其他端口用 `JIAFU_RENDER_URL` 指定。该检查采样茶房与正房的实际屋顶淡出、恢复过程，并在三个视角下只改变近裁剪面，检查地面和建筑是否发生大面积跳色；截图与报告写入根目录 `.cache/render-stability-qa/`。
+
 ## 目录与模型
 
 `src/` 为地图、建筑、室内、植被、人物与对话逻辑，`src/ui-theme.css` 为合并版界面主题；`public/assets/` 为运行素材；`tools/` 为模型导出与验证工具；`outputs/` 为实际渲染截图及检查记录。
