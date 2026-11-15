@@ -1,4 +1,5 @@
 import * as T from 'three';
+import {characterClearance} from './collision.js';
 
 // The visible terraces and continuous navigation heights share one set of measurements.
 export const levels={low:.12,court:1.2,study:2.2,hall:3.6,guest:1.25,hillLanding:2.8,hill:5.6};
@@ -18,8 +19,8 @@ export const stairs=[
  {id:'study-front',from:[-25,-4],to:[-25,-10],width:3.4,low:.12,high:2.2},
  {id:'study-rear',from:[-12,-23],to:[-18,-23],width:2.4,low:.12,high:2.2},
  {id:'guest',from:[10,-15],to:[10,-19.5],width:3.2,low:.12,high:1.25},
- {id:'hill-lower',from:[-29.8,17],to:[-29.8,11],width:2.8,low:.12,high:2.8},
- {id:'hill-upper',from:[-33.2,8],to:[-33.2,1],width:2.8,low:2.8,high:5.6}
+ {id:'hill-lower',from:[-29.8,15.5],to:[-29.8,11],width:2.8,low:.12,high:2.8},
+ {id:'hill-upper',from:[-32,8],to:[-32,1],width:2.8,low:2.8,high:5.6}
 ];
 const inside=(x,z,r,margin=0)=>Math.abs(x-r.x)<=r.w/2+margin&&Math.abs(z-r.z)<=r.d/2+margin;
 function stairRect(s){return{x:(s.from[0]+s.to[0])/2,z:(s.from[1]+s.to[1])/2,w:Math.abs(s.to[0]-s.from[0])||s.width,d:Math.abs(s.to[1]-s.from[1])||s.width};}
@@ -31,7 +32,7 @@ export function terrainHeight(x,z){
 }
 export function buildTerrain(a,mapData){
  const{box,mesh,beam,mat,mats,ball,obstacle}=a;
- function rail(p,q,y,{wood=false,collision=true}={}){const len=Math.hypot(q[0]-p[0],q[1]-p[1]),n=Math.ceil(len/.9),m=wood?'wood':'ivory';for(let i=0;i<=n;i++){const t=i/n,x=T.MathUtils.lerp(p[0],q[0],t),z=T.MathUtils.lerp(p[1],q[1],t);if(onStair(x,z,.4))continue;box(x,y+.43,z,.12,.86,.12,m);if(!wood)mesh(ball,mats.stone,x,y+.92,z,.12,.12,.12);if(collision)obstacle(x,z,.12,.12,'terrace-rail');if(i<n){const tt=(i+1)/n,xx=T.MathUtils.lerp(p[0],q[0],tt),zz=T.MathUtils.lerp(p[1],q[1],tt);if(!onStair(xx,zz,.4))beam([x,y+.8,z],[xx,y+.8,zz],.1,m);}}}
+ function rail(p,q,y,{wood=false,collision=true}={}){const len=Math.hypot(q[0]-p[0],q[1]-p[1]),n=Math.ceil(len/.9),m=wood?'wood':'ivory';for(let i=0;i<=n;i++){const t=i/n,x=T.MathUtils.lerp(p[0],q[0],t),z=T.MathUtils.lerp(p[1],q[1],t);if(onStair(x,z,.4))continue;box(x,y+.43,z,.12,.86,.12,m);if(!wood)mesh(ball,mats.stone,x,y+.92,z,.12,.12,.12);if(collision)obstacle(x,z,.12,.12,'terrace-rail',{shape:'box',clearance:characterClearance.railing,kind:'building'});if(i<n){const tt=(i+1)/n,xx=T.MathUtils.lerp(p[0],q[0],tt),zz=T.MathUtils.lerp(p[1],q[1],tt);if(!onStair(xx,zz,.4))beam([x,y+.8,z],[xx,y+.8,zz],.1,m);}}}
  for(const r of terraces){
   if(r.natural){
    // Rugged rock skirts, rather than a tall rectangular stone pedestal under the hill.

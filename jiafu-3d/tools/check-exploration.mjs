@@ -1,3 +1,4 @@
+import {setDoorOpen} from '../src/collision.js';
 import assert from 'node:assert/strict';
 import {journeyStages,journeyNodes,sisterIds,initializeJourney,readyStages,finishJourneyStage,validJourneyPending} from '../src/exploration-story.js';
 import {createWorld} from '../src/world.js';
@@ -12,12 +13,12 @@ for(const stage of journeyStages.filter(s=>s.id!=='gate')){
 const permutations=ids=>ids.length?ids.flatMap((id,i)=>permutations(ids.filter((_,j)=>i!==j)).map(rest=>[id,...rest])):[[]];
 const world=createWorld(),nav=createNavigation(world.bounds,world.solid,.34,.5,world.groundHeight),routes=[];
 for(const order of permutations(sisterIds)){
- const state=fresh();assert(!finishJourneyStage(state,'baoyu'));let from=world.spawn,total=0;world.doors[0].collider.enabled=true;
+ const state=fresh();assert(!finishJourneyStage(state,'baoyu'));let from=world.spawn,total=0;setDoorOpen(world.doors[0],false);
  for(const id of ['gate','reception','fengjie',...order,'wang','baoyu','settle']){
   assert(readyStages(state).some(s=>s.id===id),id+' unlocked by conversations');
   const stage=journeyStages.find(s=>s.id===id),npc=world.npcs.find(n=>n.id===stage.npc);
-  if(stage.door){const door=world.doors.find(d=>d.id===stage.door);if(door.collider.enabled){const stop=world.interact.find(i=>i.id===door.id);assert(nav.route(from.x,from.z,stop.x,stop.z).length);door.collider.enabled=false;}}
-  assert(nav.valid(npc.approach.x,npc.approach.z));const route=nav.route(from.x,from.z,npc.approach.x,npc.approach.z);assert(route.length,id+' can be reached');let previous=from;
+  if(stage.door){const door=world.doors.find(d=>d.id===stage.door);if(door.collider.enabled){const stop=world.interact.find(i=>i.id===door.id);assert(nav.route(from.x,from.z,stop.x,stop.z).length);setDoorOpen(door,true);}}
+  assert(nav.valid(npc.approach.x,npc.approach.z),id+' approach is clear');const route=nav.route(from.x,from.z,npc.approach.x,npc.approach.z);assert(route.length,id+' can be reached');let previous=from;
   for(const point of route){assert(nav.canMove(previous.x,previous.z,point.x,point.z),id+' continuous path');previous=point;}
   const closest=[...world.interact,...world.npcs].map(n=>({id:n.id,d:Math.hypot(n.x-npc.approach.x,n.z-npc.approach.z)})).sort((a,b)=>a.d-b.d)[0];assert.equal(closest.id,npc.id,id+' dialogue can be selected without an object taking priority');
   if(npc.room)assert(world.rooms.find(r=>r.id===npc.room).contains(npc.approach.x,npc.approach.z,.25));

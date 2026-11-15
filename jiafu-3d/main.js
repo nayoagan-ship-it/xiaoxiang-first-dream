@@ -7,6 +7,7 @@ import {createWorld,places,bounds,spawn} from './src/world.js';
 import {createNavigation} from './src/navigation.js';
 import {planJourneyRoute,remainingRoute,pathLength} from './src/route-planner.js';
 import {createRouteGuide} from './src/route-guide.js';
+import {overlapsObstacle,recoverWalkPosition,setDoorOpen,updateDoorMotion} from './src/collision.js';
 import {createDialogue} from './src/dialogue.js';
 import {characterLines} from './src/character-roster.js';
 import {journeyStages,journeyNodes,sisterIds,initializeJourney,readyStages,finishJourneyStage,journeyObjective,validJourneyPending} from './src/exploration-story.js';
@@ -34,15 +35,16 @@ function save(){state.x=world.player.root.position.x;state.z=world.player.root.p
 
 if(![8,9].includes(loaded.worldRevision)){state.x=spawn.x;state.z=spawn.z;}
 const world=createWorld();await world.assetsReady;const navigation=createNavigation(bounds,world.solid,.34,.5,world.groundHeight),scene=new T.Scene();scene.background=new T.Color('#b7bca7');scene.fog=new T.Fog('#b7bca7',105,180);scene.add(world.root);
-for(const door of world.doors){door.open=Boolean(state.doors[door.id]);door.collider.enabled=!door.open;door.hinge.rotation.y=door.open?-Math.PI*.48:0;}
+for(const door of world.doors)setDoorOpen(door,Boolean(state.doors[door.id]));
 world.interact.find(i=>i.id==='petals').visual.visible=!state.petal;
-if(!navigation.valid(state.x,state.z)){const p=navigation.nearest(state.x,state.z,8)||spawn;state.x=p.x;state.z=p.z;}
+if(!navigation.valid(state.x,state.z)){const p=recoverWalkPosition(navigation,world,state);state.x=p.x;state.z=p.z;}
 state.worldRevision=9;world.player.root.position.set(state.x,world.groundHeight(state.x,state.z),state.z);
 const renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.65));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.98;$('scene').append(renderer.domElement);renderer.domElement.setAttribute('aria-label','可自由探索的三维贾府，使用WASD移动，E交互');renderer.domElement.tabIndex=0;
 scene.add(new T.HemisphereLight('#fff4d8','#77705a',1.45));
 const sun=new T.DirectionalLight('#ffe3b7',3.4);sun.position.set(-32,48,28);sun.castShadow=true;sun.shadow.mapSize.set(3072,3072);sun.shadow.camera.left=-58;sun.shadow.camera.right=58;sun.shadow.camera.top=58;sun.shadow.camera.bottom=-58;sun.shadow.camera.near=1;sun.shadow.camera.far=135;sun.shadow.normalBias=.035;sun.shadow.bias=-.0003;scene.add(sun);
 const camera=new T.OrthographicCamera(-45,45,34,-34,.1,210),cameraTarget=new T.Vector3(0,0,0),cameraOffset=new T.Vector3(48,57,48);let halfHeight=41.2,zoomHeight=14;
 const ray=new T.Raycaster(),mouse=new T.Vector2();
+const sightRay=new T.Raycaster(),sightTarget=new T.Vector3(),sightDirection=new T.Vector3();let sightClock=0,playerOccluded=false;
 const footRing=new T.Mesh(new T.RingGeometry(.45,.54,32),new T.MeshBasicMaterial({color:'#f4de9f',transparent:true,opacity:.8,side:T.DoubleSide}));footRing.rotation.x=-Math.PI/2;scene.add(footRing);
 const targetRing=new T.Mesh(new T.RingGeometry(.22,.32,24),new T.MeshBasicMaterial({color:'#d4b478',transparent:true,opacity:.8,side:T.DoubleSide}));targetRing.rotation.x=-Math.PI/2;targetRing.visible=false;scene.add(targetRing);
 const routeVisual=createRouteGuide(scene,world.groundHeight);
@@ -79,7 +81,7 @@ function talk(npc){
 function interact(){if(blocked())return;updateInteraction();if(!nearest)return;waypoints=[];autoWalkStage=null;routeDirty=true;targetRing.visible=false;
  if(nearest.role){talk(nearest);return;}
  conversationNpc=null;
- if(nearest.kind==='door'){const door=world.doors.find(d=>d.id===nearest.id);door.open=!door.open;door.collider.enabled=!door.open;state.doors[door.id]=door.open;toast(door.open?'茶房门轻轻推开了。':'我将门轻轻掩好。');discover(nearest.id);save();return;}
+ if(nearest.kind==='door'){const door=world.doors.find(d=>d.id===nearest.id);if(overlapsObstacle(door.swingCollider,world.player.root.position.x,world.player.root.position.z)){toast('先离开门扇，再轻轻开合。');return;}setDoorOpen(door,!door.open,settings.motion&&!reducedMotion.matches);navigation.invalidate();state.doors[door.id]=door.open;toast(door.open?'茶房门轻轻推开了。':'我将门轻轻掩好。');discover(nearest.id);save();return;}
  if(nearest.kind==='collect'&&!state.petal){state.petal=true;nearest.visual.visible=false;}
  const text=nearest.kind==='collect'&&state.discoveries.includes(nearest.id)?'袖中的落花安静地贴着衣襟。我不必再多取一片，这一点初来的春意，已足够记下。':nearest.text;
  dialogue.lines([thought(text)],'item:'+nearest.id);
@@ -99,6 +101,7 @@ function updateHUD(){
 }
 function navigate(x,z){if(blocked())return;autoWalkStage=null;routeDirty=true;const path=navigation.route(world.player.root.position.x,world.player.root.position.z,x,z);if(!path.length){toast('这处暂不便落脚，试试旁边的石径。');return;}waypoints=path;targetRing.position.set(path.at(-1).x,world.groundHeight(path.at(-1).x,path.at(-1).z)+.06,path.at(-1).z);targetRing.visible=true;}
 function updateRouteGuide(dt=0,force=false){
+ if(world.doors.some(d=>d.moving))return;
  routeElapsed+=dt;if(!force&&!routeDirty&&routeElapsed<.3)return;routeElapsed=0;
  $('route-assist').hidden=!state.started||state.complete;
  if(!state.started||state.complete){routePlan=null;routePoints=[];routeVisual.setPath([]);return;}
@@ -182,7 +185,7 @@ function drawMap(canvas,big=false){
  c.fillStyle='#6b8467';for(const tree of world.mapData.trees){const[x,z]=point(tree.x,tree.z);c.beginPath();c.arc(x,z,tree.r*s,0,Math.PI*2);c.fill();}
  c.fillStyle='#939a85';for(const rock of world.mapData.rocks){const[x,z]=point(rock.x,rock.z);c.beginPath();c.arc(x,z,rock.r*s,0,Math.PI*2);c.fill();}
  c.fillStyle='#617b6a';for(const roof of world.roofs){if(roof.group.name.endsWith('_Cutaway'))continue;const r=roof.rect;const[x,z]=point(r.x-r.w/2,r.z-r.d/2);c.globalAlpha=.7;c.fillRect(x,z,r.w*s,r.d*s);}c.globalAlpha=1;
- c.fillStyle='#a6ab93';for(const o of world.solid){if(!o.enabled||o.id?.startsWith('water')||o.w>4&&o.d>4)continue;const[x,z]=point(o.x-o.w/2,o.z-o.d/2);c.fillRect(x,z,Math.max(.7,o.w*s),Math.max(.7,o.d*s));}
+ c.fillStyle='#a6ab93';for(const o of world.solid){if(!o.enabled||o.shape==='sweep'||o.id?.startsWith('water')||o.w>4&&o.d>4)continue;const angle=o.angle||0,ow=Math.abs(Math.cos(angle))*o.w+Math.abs(Math.sin(angle))*o.d,od=Math.abs(Math.sin(angle))*o.w+Math.abs(Math.cos(angle))*o.d;const[x,z]=point(o.x-ow/2,o.z-od/2);c.fillRect(x,z,Math.max(.7,ow*s),Math.max(.7,od*s));}
  if(settings.routeGuide&&state.started&&routePoints.length>1){c.save();c.lineCap='round';c.lineJoin='round';c.beginPath();routePoints.forEach((p,i)=>i?c.lineTo(...point(p.x,p.z)):c.moveTo(...point(p.x,p.z)));c.strokeStyle='#fff5d6c9';c.lineWidth=3.4*pixels.x;c.stroke();c.strokeStyle='#b88636';c.lineWidth=1.65*pixels.x;c.setLineDash([3*pixels.x,2.5*pixels.x]);c.lineDashOffset=!big&&settings.motion&&!reducedMotion.matches?-time*3*pixels.x:0;c.stroke();c.restore();}
  if(big){c.font='17px SimSun';c.textAlign='center';c.fillStyle='#3d5c47';for(const p of places){const[x,z]=point(p.x,p.z);c.fillStyle='#fff9e7dc';c.fillRect(x-49,z-14,98,26);c.fillStyle='#42604b';c.fillText(p.name,x,z+5);}}
  for(const stage of readyStages(state)){
@@ -211,7 +214,7 @@ function frame(){const dt=Math.min(clock.getDelta(),.05);if(isHidden)return;time
   let dx=0,dz=0,routeStep=Infinity;const forward=(keys.has('w')||keys.has('arrowup')?1:0)-(keys.has('s')||keys.has('arrowdown')?1:0),right=(keys.has('d')||keys.has('arrowright')?1:0)-(keys.has('a')||keys.has('arrowleft')?1:0);
   if(forward||right){dx=(-forward+right)/Math.SQRT2;dz=(-forward-right)/Math.SQRT2;const length=Math.hypot(dx,dz);dx/=length;dz/=length;}
   else if(waypoints.length){const p=waypoints[0],distance=Math.hypot(p.x-player.position.x,p.z-player.position.z);if(distance<.01)waypoints.shift();else{dx=(p.x-player.position.x)/distance;dz=(p.z-player.position.z)/distance;routeStep=distance;}}
-  if(dx||dz){const speed=Math.min(4.25*dt,routeStep),tx=player.position.x+dx*speed,tz=player.position.z+dz*speed;if(navigation.canMove(player.position.x,player.position.z,tx,tz)){player.position.x=tx;player.position.z=tz;}else{if(navigation.canMove(player.position.x,player.position.z,tx,player.position.z))player.position.x=tx;if(navigation.canMove(player.position.x,player.position.z,player.position.x,tz))player.position.z=tz;}const angle=Math.atan2(dx,dz);let diff=T.MathUtils.euclideanModulo(angle-player.rotation.y+Math.PI,Math.PI*2)-Math.PI;player.rotation.y+=diff*Math.min(1,dt*11);moving=true;}
+  if(dx||dz){const previousX=player.position.x,previousZ=player.position.z,speed=Math.min(4.25*dt,routeStep),tx=player.position.x+dx*speed,tz=player.position.z+dz*speed;if(navigation.canMove(player.position.x,player.position.z,tx,tz)){player.position.x=tx;player.position.z=tz;}else{if(navigation.canMove(player.position.x,player.position.z,tx,player.position.z))player.position.x=tx;if(navigation.canMove(player.position.x,player.position.z,player.position.x,tz))player.position.z=tz;}const angle=Math.atan2(dx,dz);let diff=T.MathUtils.euclideanModulo(angle-player.rotation.y+Math.PI,Math.PI*2)-Math.PI;player.rotation.y+=diff*Math.min(1,dt*11);moving=Math.hypot(player.position.x-previousX,player.position.z-previousZ)>.0001;}
   if(!waypoints.length){targetRing.visible=false;if(autoWalkStage){autoWalkStage=null;routeDirty=true;}}
  }
  if(!dialogue.active)conversationNpc=null;
@@ -226,13 +229,14 @@ function frame(){const dt=Math.min(clock.getDelta(),.05);if(isHidden)return;time
   npc.root.position.y=world.groundHeight(npc.root.position.x,npc.root.position.z);npc.collider.x=npc.root.position.x;npc.collider.z=npc.root.position.z;
   updateCharacter(npc,{time,delta:dt,enabled:characterMotion,attention:focused?player.position:null,speaking:dialogue.active&&(speaker===npc.name||npc===conversationNpc&&!playerSpeaking),listening:dialogue.active&&npc===conversationNpc&&playerSpeaking});
  }
- for(const door of world.doors){const target=door.open?-Math.PI*.48:0;door.hinge.rotation.y=settings.motion?T.MathUtils.lerp(door.hinge.rotation.y,target,Math.min(1,dt*5)):target;}
+ for(const door of world.doors)if(updateDoorMotion(door,dt,settings.motion&&!reducedMotion.matches)){routeDirty=true;navigation.invalidate();}
  activeRoom=world.rooms.find(r=>r.contains(player.position.x,player.position.z,.25))||null;world.setRoomFocus(overview?null:activeRoom);
  for(const roof of world.roofs){const r=roof.rect,inside=!overview&&(roof.room?roof.room.contains(player.position.x,player.position.z,-.1):Math.abs(player.position.x-r.x)<r.w/2+1&&Math.abs(player.position.z-r.z)<r.d/2+1);for(const m of roof.materials){const target=inside?(roof.group.name.includes('Pavilion')?.25:roof.group.name.endsWith('_Cutaway')?.025:0):1;m.opacity=settings.motion?T.MathUtils.lerp(m.opacity,target,Math.min(1,dt*5)):target;m.depthWrite=m.opacity>.5;}roof.group.visible=roof.materials.some(m=>m.opacity>.012);roof.group.traverse(o=>{if(o.isMesh)o.castShadow=!inside;});}
  const dest=overview?new T.Vector3(0,3,1):new T.Vector3(player.position.x,player.position.y+1,player.position.z),factor=settings.motion?1-Math.exp(-dt*3.3):1;cameraTarget.lerp(dest,factor);halfHeight=T.MathUtils.lerp(halfHeight,overview?41.2:zoomHeight*(activeRoom ? .74 : 1),factor);const aspect=innerWidth/Math.max(660,innerHeight);camera.left=-halfHeight*aspect;camera.right=halfHeight*aspect;camera.top=halfHeight;camera.bottom=-halfHeight;camera.position.copy(cameraTarget).add(cameraOffset);camera.lookAt(cameraTarget);camera.updateProjectionMatrix();camera.updateMatrixWorld();
  for(const l of zoneLabels)label(l.e,l.x,world.groundHeight(l.x,l.z)+3.2,l.z,overview?['hall','rockery','garden'].includes(l.id):Math.hypot(player.position.x-l.x,player.position.z-l.z)>11);
  for(const {e,npc}of npcLabels)label(e,npc.root.position.x,npc.root.position.y+npc.height+.3,npc.root.position.z,!overview&&(!npc.room||activeRoom?.id===npc.room)&&Math.hypot(npc.root.position.x-player.position.x,npc.root.position.z-player.position.z)<20);
- label(playerLabel,player.position.x,player.position.y+world.player.height+.3,player.position.z,overview);
+ sightClock+=dt;if(!overview&&sightClock>.22){sightClock=0;sightTarget.set(player.position.x,player.position.y+world.player.height*.78,player.position.z);const distance=sightTarget.distanceTo(camera.position);sightDirection.subVectors(sightTarget,camera.position).normalize();sightRay.set(camera.position,sightDirection);sightRay.far=distance-.15;playerOccluded=world.roofs.some(r=>r.group.visible&&r.materials.some(m=>m.opacity>.55)&&sightRay.intersectObject(r.group,true).length>0);}
+ label(playerLabel,player.position.x,player.position.y+world.player.height+.3,player.position.z,overview||playerOccluded);
  const place=places.find(p=>player.position.x>=p.rect[0]&&player.position.x<=p.rect[2]&&player.position.z>=p.rect[1]&&player.position.z<=p.rect[3])||places[2];const placeId=activeRoom?'interior:'+activeRoom.id:place.id;if(placeId!==currentPlace){currentPlace=placeId;$('place-name').textContent=activeRoom?activeRoom.name+' · 内室':place.name;}
  for(const effect of world.animated){if(effect.type==='ripple'){const t=(time*.23+effect.phase)%1;effect.mesh.scale.setScalar(settings.motion?1+t:1);effect.mesh.material.opacity=settings.motion?.2*(1-t):.12;}}
  updateInteraction();updateRouteGuide(dt);routeVisual.update(time,settings.motion&&!reducedMotion.matches,Boolean(settings.routeGuide&&state.started&&!state.complete&&!dialogue.active&&!$('modal').open&&routePlan));drawMap(mapCanvas);saveClock+=dt;if(saveClock>1){saveClock=0;save();}renderer.render(scene,camera);

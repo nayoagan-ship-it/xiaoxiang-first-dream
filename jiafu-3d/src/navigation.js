@@ -1,3 +1,4 @@
+import {overlapsObstacle} from './collision.js';
 // A* with exact endpoints, checked clearance and cached grid edges.
 class MinHeap{
  constructor(){this.items=[];}
@@ -7,16 +8,18 @@ class MinHeap{
 }
 export function createNavigation(bounds,obstacles,radius=.34,step=.5,heightAt=()=>.12){
  const width=Math.round((bounds.maxX-bounds.minX)/step)+1,height=Math.round((bounds.maxZ-bounds.minZ)/step)+1,total=width*height;
- const valid=(x,z)=>x>bounds.minX+.6&&x<bounds.maxX-.6&&z>bounds.minZ+.6&&z<bounds.maxZ-.6&&!obstacles.some(o=>o.enabled&&Math.abs(x-o.x)<o.w/2+radius-1e-6&&Math.abs(z-o.z)<o.d/2+radius-1e-6);
+ let spatial=new Map(),indexedLength=-1;
+ function rebuildIndex(){spatial=new Map();for(const o of obstacles){const a=o.angle||0,c=Math.abs(Math.cos(a)),s=Math.abs(Math.sin(a)),margin=o.clearance??radius,hw=(c*o.w+s*o.d)/2+margin,hd=(s*o.w+c*o.d)/2+margin;for(let ix=Math.floor((o.x-hw)/4);ix<=Math.floor((o.x+hw)/4);ix++)for(let iz=Math.floor((o.z-hd)/4);iz<=Math.floor((o.z+hd)/4);iz++){const key=ix+','+iz;if(!spatial.has(key))spatial.set(key,[]);spatial.get(key).push(o);}}indexedLength=obstacles.length;}
+ const valid=(x,z)=>{if(x<=bounds.minX+.6||x>=bounds.maxX-.6||z<=bounds.minZ+.6||z>=bounds.maxZ-.6)return false;if(indexedLength!==obstacles.length)rebuildIndex();return !(spatial.get(Math.floor(x/4)+','+Math.floor(z/4))||[]).some(o=>o.enabled&&overlapsObstacle(o,x,z,radius));};
  const toCell=(x,z)=>[Math.round((x-bounds.minX)/step),Math.round((z-bounds.minZ)/step)];
  const toWorld=(x,z)=>({x:bounds.minX+x*step,z:bounds.minZ+z*step});
  const canMove=(sx,sz,tx,tz)=>{const distance=Math.hypot(tx-sx,tz-sz),samples=Math.max(1,Math.ceil(distance/.08));let previous=heightAt(sx,sz);for(let i=1;i<=samples;i++){const t=i/samples,x=sx+(tx-sx)*t,z=sz+(tz-sz)*t,y=heightAt(x,z);if(!valid(x,z)||Math.abs(y-previous)>distance/samples*.85+.004)return false;previous=y;}return true;};
- function nearest(x,z,range=5){if(valid(x,z))return {x,z};for(let r=step;r<=range;r+=step)for(let a=0;a<16;a++){const p={x:x+Math.cos(a*Math.PI/8)*r,z:z+Math.sin(a*Math.PI/8)*r};if(valid(p.x,p.z))return p;}return null;}
- let revision='',free=new Map(),edges=new Map();
- function invalidate(){revision='';free.clear();edges.clear();}
+ function nearest(x,z,range=5,accept=()=>true){if(valid(x,z)&&accept({x,z}))return {x,z};for(let r=step;r<=range;r+=step)for(let a=0;a<32;a++){const p={x:x+Math.cos(a*Math.PI/16)*r,z:z+Math.sin(a*Math.PI/16)*r};if(valid(p.x,p.z)&&accept(p))return p;}return null;}
+ let revision='',free=new Map(),edges=new Map(),fineNavigation=null;
+ function invalidate(){revision='';free.clear();edges.clear();indexedLength=-1;fineNavigation?.invalidate();}
  const walk=(x,z)=>{if(x<0||x>=width||z<0||z>=height)return false;const i=z*width+x;if(!free.has(i)){const p=toWorld(x,z);free.set(i,valid(p.x,p.z));}return free.get(i);};
  function connectors(x,z){const [cx,cz]=toCell(x,z),result=[];for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){const xx=cx+dx,zz=cz+dz;if(!walk(xx,zz))continue;const p=toWorld(xx,zz);if(canMove(x,z,p.x,p.z))result.push({i:zz*width+xx,cost:Math.hypot(x-p.x,z-p.z)});}return result;}
- function route(sx,sz,tx,tz){
+ function routeGrid(sx,sz,tx,tz){
   const signature=obstacles.map(o=>o.enabled?'1':'0').join('');if(signature!==revision){free.clear();edges.clear();revision=signature;}
   const target=nearest(tx,tz);if(!target||!valid(sx,sz))return [];
   if(canMove(sx,sz,target.x,target.z))return Math.hypot(target.x-sx,target.z-sz)>.001?[target]:[];
@@ -36,6 +39,8 @@ export function createNavigation(bounds,obstacles,radius=.34,step=.5,heightAt=()
    }
   }return [];
  }
+ // Narrow curved bridge corners can fall between coarse grid cells.
+ function route(sx,sz,tx,tz){const path=routeGrid(sx,sz,tx,tz);if(path.length||step<=.25||!valid(sx,sz)||Math.hypot(tx-sx,tz-sz)<.001)return path;fineNavigation??=createNavigation(bounds,obstacles,radius,step/2,heightAt);return fineNavigation.route(sx,sz,tx,tz);}
  const alternatives=new WeakMap();
  function without(obstacle){if(!alternatives.has(obstacle))alternatives.set(obstacle,createNavigation(bounds,obstacles.filter(o=>o!==obstacle),radius,step,heightAt));return alternatives.get(obstacle);}
  return {valid,route,nearest,canMove,invalidate,without};

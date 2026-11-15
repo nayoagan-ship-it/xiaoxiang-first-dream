@@ -4,12 +4,12 @@ export const npcSpecs=[
  {id:'matron',name:'引路婆子',design:'matron',x:18,z:24,role:'intro',facing:.35,approach:{x:18,z:25.5},location:'停轿小院'},
  {id:'xueyan',name:'雪雁',design:'xueyan',x:11.5,z:-23.5,role:'xueyan',facing:-.5,room:'guest',approach:{x:10,z:-23.5},location:'东侧绣楼 · 箱笼旁'},
  {id:'keeper',name:'看门仆人',design:'keeper',x:21.5,z:29,role:'keeper',facing:.2,approach:{x:21.5,z:30.5},location:'府门内侧'},
- {id:'fengjie',name:'王熙凤',design:'fengjie',x:17,z:18.8,role:'main',facing:.25,approach:{x:18.5,z:19.5},location:'东前院 · 绣房廊前'},
+ {id:'fengjie',name:'王熙凤',design:'fengjie',x:17,z:19.8,role:'main',facing:.25,approach:{x:18.5,z:20.2},location:'东前院 · 绣房廊前'},
  {id:'jiamu',name:'贾母',design:'jiamu',x:-4,z:-12.8,role:'jiamu',facing:0,room:'hall',approach:{x:-4,z:-10.5},location:'正房主榻前'},
  {id:'wang',name:'王夫人',design:'wang',x:1,z:-27.5,role:'wang',facing:-.45,approach:{x:1,z:-26},location:'后院 · 绣楼西廊'},
  {id:'yingchun',name:'贾迎春',design:'yingchun',x:-24.3,z:21.7,role:'yingchun',facing:.65,room:'tea',approach:{x:-23.5,z:21.5},location:'西前院 · 茶房'},
  {id:'tanchun',name:'贾探春',design:'tanchun',x:-23.1,z:-17,role:'tanchun',facing:.55,room:'study',approach:{x:-23,z:-15.5},location:'西厢书阁 · 书案旁'},
- {id:'xichun',name:'贾惜春',design:'xichun',x:-33,z:-2,role:'xichun',facing:.3,approach:{x:-34,z:-1.5},location:'叠石高台 · 听风亭'},
+ {id:'xichun',name:'贾惜春',design:'xichun',x:-33,z:-2.5,role:'xichun',facing:.3,approach:{x:-33.05,z:-1},location:'叠石高台 · 听风亭'},
  {id:'baoyu',name:'贾宝玉',design:'baoyu',x:29.7,z:-19.3,role:'baoyu',facing:-.65,approach:{x:30.5,z:-18.5},location:'曲水亭园 · 临水亭'}
 ];
 

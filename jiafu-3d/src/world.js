@@ -6,11 +6,12 @@ import {createVegetation} from './vegetation.js';
 import {createGardenRockery} from './rockery.js';
 import {levels,terraces,stairs,terrainHeight,onStair,buildTerrain} from './terrain.js';
 import {buildInteriors} from './interiors.js';
+import {characterClearance,doorLeafBounds} from './collision.js';
 export {createPerson} from './characters.js';
 
 export const bounds={minX:-38,maxX:38,minZ:-31,maxZ:32};
 export const spawn={x:20,z:25};
-export const landmarks={spawn,mainEntrance:{x:-2.5,z:-6.5},mainInterior:{x:-4,z:-10},rockerySouth:{x:-24.5,z:12},rockeryNorth:{x:-24.5,z:2},hillBase:{x:-29.8,z:17.3},hillTop:{x:-32,z:-.7},bridgeBase:{x:23,z:.2},pavilion:{x:29,z:-19},groundClick:{x:17,z:20}};
+export const landmarks={spawn,mainEntrance:{x:-2.5,z:-6.5},mainInterior:{x:-4,z:-10},rockerySouth:{x:-24.5,z:12},rockeryNorth:{x:-24.5,z:2},hillBase:{x:-29.8,z:15.5},hillTop:{x:-32,z:-.7},bridgeBase:{x:23,z:.2},pavilion:{x:29,z:-19},groundClick:{x:17,z:20}};
 export const places=[
  {id:'arrival',name:'停轿小院',x:22,z:27,rect:[14,21,37,31]},
  {id:'gate',name:'垂花门',x:10,z:19,rect:[-1,14,25,31]},
@@ -79,7 +80,7 @@ export function createWorld(){
  wallGaps('z',14,-16,13,[[2,8]],{height:1.05,base:levels.court});
  wallGaps('x',-17,2,28,[[10,18],[24,28]],{height:1.6});
  wallGaps('x',10,16,21.8,[[17.1,20.5]],{height:1.65});
- wallGaps('z',23,-35,-17,[[-32,-17]],{height:1.45});
+ wallGaps('z',23,-34,-17,[[-32,-17]],{height:1.45});
  wallGaps('z',-8,-36,-19,[[-36,-33],[-26.2,-22.8]],{height:1.35});
  // Outer gate and sedan now share the reference's foreground centre.
  for(const x of[19.8,26.2])column(x,31,3);roof(23,31,9,3.6,3.12,'West_Gate',{height:1.3});lantern(20.3,30.5,2.45);lantern(25.7,30.5,2.45);
@@ -87,12 +88,12 @@ export function createWorld(){
  const moon=new T.Shape();moon.moveTo(-2.8,0);moon.lineTo(2.8,0);moon.lineTo(2.8,3.35);moon.lineTo(-2.8,3.35);moon.closePath();
  const hole=new T.Path();hole.absarc(0,1.48,1.44,0,Math.PI*2,true);moon.holes.push(hole);
  mesh(new T.ExtrudeGeometry(moon,{depth:.32,bevelEnabled:false}),mats.ivory,10,.12,18.8,1,1,1,Math.PI/2);
- mesh(new T.TorusGeometry(1.44,.105,6,48),mats.stone,10.2,1.6,18.8,1,1,1,Math.PI/2);
- box(10,3.55,18.8,.65,.16,5.9,'roof');obstacle(10,16.4,.4,1.1,'moon-gate');obstacle(10,21.2,.4,1.1,'moon-gate');
- for(const x of[2,8])column(x,14,2.6,levels.court);roof(5,14,8,3.6,levels.court+2.6,'Hanging_Flower_Gate',{height:1.2});lantern(2.7,14,levels.court+2.1);lantern(7.3,14,levels.court+2.1);
+ mesh(new T.TorusGeometry(1.7,.105,6,48),mats.stone,10.2,1.55,18.8,1,1,1,Math.PI/2);
+ box(10,3.55,18.8,.65,.16,5.9,'roof');obstacle(10.15,16.4,.5,2.5,'moon-gate',{shape:'box',clearance:characterClearance.body,kind:'building'});obstacle(10.15,21.2,.5,2.5,'moon-gate',{shape:'box',clearance:characterClearance.body,kind:'building'});
+ for(const x of[2,8])column(x,14,3.1,levels.court);roof(5,14,8,3.6,levels.court+3.1,'Hanging_Flower_Gate',{height:1.2});lantern(2.7,14,levels.court+2.1);lantern(7.3,14,levels.court+2.1);
  // Screen, then the broad hall stairs, anchor the middle of the procession.
  a.elevated(()=>{
- box(-1,1.42,9,5.7,2.6,.4,'stone');box(-1,1.45,9.23,5.1,1.95,.055,mat('marble','#dfdbc9'));box(-1,2.8,9,6.1,.18,.65,'roof');for(const x of[-3.5,1.5])box(x,.24,9,.75,.35,1.3,'stone');obstacle(-1,9,6,.65,'screen');
+ box(-1,1.42,9,5.7,2.6,.4,'stone');box(-1,1.45,9.23,5.1,1.95,.055,mat('marble','#dfdbc9'));box(-1,2.8,9,6.1,.18,.65,'roof');for(const x of[-3.5,1.5])box(x,.24,9,.75,.35,1.3,'stone');obstacle(-1,9,6,.65,'screen',{shape:'box',clearance:characterClearance.body,kind:'building'});
  for(let i=0;i<3;i++)beam([-3.1+i*1.3,1,9.28],[-2.3+i*1.3,2.1,9.28],.035,mat('marble-vein','#bcbfae'));
  },levels.court-.12);
  gallery([[-14,13],[-14,4],[-10,3]],{height:2.25,name:'West_Embracing_Gallery'});
@@ -103,22 +104,22 @@ export function createWorld(){
  room('East_Guest_Room',10,-25.5,10.5,8.5,{base:levels.guest,height:2.9,floors:2,roofHeight:1.65});
  room('Tea_Room',-26,21,11,6,{height:2.6,roofHeight:1.15});
  room('Front_Service_Room',6,25,13,6,{height:2.15,roofHeight:1.05});
- room('Front_East_Wing',18.2,15,10,5,{height:2.75,roofHeight:1.25});
+ room('Front_East_Wing',18.2,15,10,5,{height:3.65,roofHeight:1.25});
  a.rotated(()=>room('Garden_Listening_Room',28,5,14,6,{height:2.05,roofHeight:1.15}),28,5,Math.PI/2);
  a.rotated(()=>room('West_Gatehouse',-13,21,7,5,{height:2.0,roofHeight:1.05}),-13,21,Math.PI/2);
  gallery([[-21,17],[-21,14.5],[-19,14.5]],{height:2.15,name:'Rock_Garden_Gallery'});
  gallery([[16,1],[16,-6],[16,-14],[19,-22],[23,-26]],{height:2.2,name:'Garden_Winding_Gallery'});
  gallery([[-18,-23],[-12,-23],[-12,-26],[-1,-28],[3,-28]],{height:2.05,width:2,name:'Rear_Folded_Gallery'});
- gallery([[19,9],[22,6],[22,0],[23,-1]],{height:2.15,width:2,name:'Waterside_Approach'});
+ gallery([[19,9],[22,6],[22,0],[23,-1]],{height:2.15,width:2,name:'Waterside_Approach',omitColumn:(x,z)=>Math.hypot(x-23,z+1)<2.2});
  // Interior furniture shares the existing collision and interaction systems.
  const interior=buildInteriors(a,item);
- const hinge=new T.Group();hinge.position.set(-27.3,.12,24);root.add(hinge);box(1.3,1.22,0,2.6,2.4,.14,'wood',0,hinge);box(2.2,1.2,.12,.09,.2,.09,'gold',0,hinge);const doorCollider=obstacle(-26,24,2.6,.25,'tea-door');doors.push({id:'tea-door',hinge,collider:doorCollider,open:false});
+ const hinge=new T.Group();hinge.position.set(-27.3,.12,24);root.add(hinge);box(1.3,1.475,0,2.6,2.95,.14,'wood',0,hinge);box(2.2,1.45,.12,.09,.2,.09,'gold',0,hinge);const doorCollider=obstacle(-26,24,2.6,.4,'tea-door',{shape:'box',clearance:characterClearance.body,kind:'building'});const door={id:'tea-door',hinge,collider:doorCollider,open:false,moving:false};door.openCollider=obstacle(0,0,2.6,.14,'tea-door-open',{...doorLeafBounds(door,Math.PI*.48),enabled:false,kind:'building'});door.swingCollider=obstacle(-26,22.7,3,3,'tea-door-swing',{shape:'sweep',clearance:characterClearance.body,enabled:false,parts:Array.from({length:25},(_,i)=>doorLeafBounds(door,Math.PI*.48*i/24))});doors.push(door);
  item('tea-door','推开茶房门',-26,25.4,'door','门扇轻轻让开，茶香从屋里缓缓漫出来。');
  createGardenRockery(a,mapData,{x:-24.5,z:7.5});
  pavilion('Hilltop_Listening_Pavilion',-32,-2,{base:levels.hill,radius:2.7,height:2.5});bench(-32,-3.6,levels.hill);
  for(const[x,z,h]of[[-35,0,1.1],[-29,-3,1.35],[-35,9,.8]])rock(x,z,.6,{y:groundHeight(x,z)-.12,tall:h});
  item('rockery','穿洞叠石',-24.5,9.4,'look','山石在头顶合成一孔，脚下却留着明亮的路。转过石壁，方才未见的楼檐忽然露了出来。');
- item('hill-pavilion','登亭听风',-32,-.7,'look','我拾级来到亭边。高低的屋脊从花木间连成一片，初来时认不清的回廊，此刻都有了方向。');
+ item('hill-pavilion','登亭听风',-31.4,-.9,'look','我拾级来到亭边。高低的屋脊从花木间连成一片，初来时认不清的回廊，此刻都有了方向。');
  // Long eastern pond: a narrow five-part zigzag reaches the pavilion from the south bank.
  const shape=new T.Shape();pondOutline.forEach(([x,z],i)=>i?shape.lineTo(x,-z):shape.moveTo(x,-z));shape.closePath();const water=new T.Mesh(new T.ShapeGeometry(shape),new T.MeshPhysicalMaterial({color:'#789f92',roughness:.25,metalness:.1,transparent:true,opacity:.9}));water.rotation.x=-Math.PI/2;water.position.y=.1;water.receiveShadow=true;root.add(water);
  for(let z=-25;z<-1;z+=.5){let start=null;for(let x=17.5;x<=36;x+=.5){const blocked=inPolygon(x,z,pondOutline)&&!bridgeAt(x,z)&&Math.hypot(x-29,z+19)>3.2;if(blocked&&start===null)start=x;if((!blocked||x>=36)&&start!==null){obstacle((start+x-.5)/2,z,x-start,.5,'water');start=null;}}}
@@ -133,7 +134,7 @@ export function createWorld(){
    const nx=axis==='x'?side*.08:0,nz=axis==='z'?side*.08:0;
    if(bridgeAt(px+nx,pz+nz)||pz> -1.15||Math.hypot(px-29,pz+19)<3.1)continue;
    const dx=axis==='z'?length/n/2:0,dz=axis==='x'?length/n/2:0;
-   beam([px-dx,1.28,pz-dz],[px+dx,1.28,pz+dz],.075,'ivory');box(px,.94,pz,.075,.74,.075,'ivory');obstacle(px,pz,axis==='x'?.08:length/n,axis==='z'?.08:length/n,'bridge-rail');
+   beam([px-dx,1.28,pz-dz],[px+dx,1.28,pz+dz],.075,'ivory');box(px,.94,pz,.075,.74,.075,'ivory');obstacle(px,pz,axis==='x'?.08:length/n,axis==='z'?.08:length/n,'bridge-rail',{shape:'box',clearance:characterClearance.railing,kind:'building'});
   }
  }
  pavilion('Waterside_Pavilion',29,-19,{base:.57,radius:2.7,height:2.55});

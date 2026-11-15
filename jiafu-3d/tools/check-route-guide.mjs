@@ -1,3 +1,4 @@
+import {setDoorOpen} from '../src/collision.js';
 import assert from 'node:assert/strict';
 import * as T from 'three';
 import {createNavigation} from '../src/navigation.js';
@@ -22,7 +23,7 @@ const world=createWorld(),navigation=createNavigation(bounds,world.solid,.34,.5,
 let current={...spawn},visited=[],doorStops=0,maxPlanMs=0;
 while(!state.complete){
  const started=performance.now();let plan=planJourneyRoute({from:current,stages:readyStages(state),npcs:world.npcs,doors:world.doors,items:world.interact,navigation});maxPlanMs=Math.max(maxPlanMs,performance.now()-started);assert(plan,'a reachable next encounter');
- if(plan.door){doorStops++;assert.equal(plan.door.id,'tea-door');current=plan.destination;plan.door.open=true;plan.door.collider.enabled=false;plan=planJourneyRoute({from:current,stages:readyStages(state),npcs:world.npcs,doors:world.doors,items:world.interact,navigation,preferredId:plan.stage.id});assert(plan&&!plan.door);}
+ if(plan.door){doorStops++;assert.equal(plan.door.id,'tea-door');current=plan.destination;setDoorOpen(plan.door,true);plan=planJourneyRoute({from:current,stages:readyStages(state),npcs:world.npcs,doors:world.doors,items:world.interact,navigation,preferredId:plan.stage.id});assert(plan&&!plan.door);}
  for(let i=1;i<plan.points.length;i++){const a=plan.points[i-1],b=plan.points[i];assert(navigation.canMove(a.x,a.z,b.x,b.z),plan.stage.id+' path segment is safe');}
  assert.deepEqual(plan.points.at(-1),plan.npc.approach,'stop at an interactable approach point');
  for(const p of sampleRoute(plan.points)){assert(navigation.valid(p.x,p.z),'a trail mark stays on walkable ground');assert(Number.isFinite(world.groundHeight(p.x,p.z)));}
