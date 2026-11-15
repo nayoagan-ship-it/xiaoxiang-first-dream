@@ -226,6 +226,15 @@ body.ui-still *,body.ui-still *:before,body.ui-still *:after{animation:none!impo
 /* Conversation leaves a place to visit; clues remain optional. */
 .quest-guide{display:flex;align-items:center;gap:8px;width:100%;margin-top:15px;padding:10px 0 0;border-top:1px solid var(--fine-line);color:#6d805e;font-size:10px;letter-spacing:1px;text-align:left}
 .quest-guide:hover{color:#9c7053}.quest-guide .ui-icon{width:15px;height:15px}
+.route-assist{margin-top:13px;padding-top:12px;border-top:1px solid var(--fine-line);display:grid;gap:6px}
+.route-assist[hidden]{display:none}
+.route-assist strong{font:13px/1.6 var(--serif);letter-spacing:1px;color:#7d663d}
+.route-assist small{font:10px/1.6 var(--ui);color:#7b806b;letter-spacing:.3px}
+.route-assist>div{display:flex;align-items:center;gap:9px;margin-top:3px}
+#route-walk{flex:1;border:1px solid #ab976455;border-radius:12px 7px 12px 7px;background:#e5ddc84a;color:#5f6247;padding:8px 9px;font-size:11px;letter-spacing:1px}
+#route-walk:hover{background:#ddd6bc88}#route-walk:disabled{opacity:.65;cursor:default}
+#route-toggle{padding:8px 2px;color:#8b8c76;font-size:10px;white-space:nowrap}
+@media(max-height:700px){.route-assist{margin-top:9px;padding-top:9px;gap:3px}.route-assist strong{font-size:12px}.route-assist small{font-size:9px}#route-walk{padding:7px}}
 .quest h2{text-wrap:balance}
 .npc-label.story-ready{border-color:#e2c48bbd;background:#526247ed;color:#fff0c5;box-shadow:0 3px 12px #52442a2b}
 .npc-label.story-ready:before{content:'❀';font-size:10px;margin-right:5px;color:#e7c3a4}

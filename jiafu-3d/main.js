@@ -5,6 +5,8 @@ import './src/memory-echo.js';
 import * as T from 'three';
 import {createWorld,places,bounds,spawn} from './src/world.js';
 import {createNavigation} from './src/navigation.js';
+import {planJourneyRoute,remainingRoute,pathLength} from './src/route-planner.js';
+import {createRouteGuide} from './src/route-guide.js';
 import {createDialogue} from './src/dialogue.js';
 import {characterLines} from './src/character-roster.js';
 import {journeyStages,journeyNodes,sisterIds,initializeJourney,readyStages,finishJourneyStage,journeyObjective,validJourneyPending} from './src/exploration-story.js';
@@ -21,11 +23,12 @@ initializeJourney(state);
 const pending=state.pendingMain;
 if(pending&&!validJourneyPending(pending)&&(!['intro','hall'].includes(pending.tag)||!window.DREAM_STORY.nodes[pending.id]))state.pendingMain=null;
 if(validJourneyPending(pending)&&state.journeyDone.includes(journeyNodes[pending.id].stage))state.pendingMain=null;
-const settings={music:oldPrefs.music??true,motion:oldPrefs.motion??true,memories:oldPrefs.memories??true,speed:oldPrefs.speed??28,...loaded.settings};
+const settings={music:oldPrefs.music??true,motion:oldPrefs.motion??true,memories:oldPrefs.memories??true,speed:oldPrefs.speed??28,routeGuide:true,...loaded.settings};
 settings.speed=Math.max(0,Math.min(70,Number(settings.speed)||0));
 document.body.classList.toggle('ui-still',!settings.motion);
 let storageWarned=false,toastTimer=0,dialogue,nearest=null,conversationNpc=null,activeRoom=null,overview=!state.started,waypoints=[],keys=new Set(),time=0,saveClock=0,currentPlace='',isHidden=false,activeClueId=null,readyPeople=new Set();
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
+let routePlan=null,routePoints=[],routeDirty=true,routeElapsed=0,routeFrom=null,autoWalkStage=null;
 function toast(text){$('toast').textContent=text;$('toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('show'),3000);}
 function save(){state.x=world.player.root.position.x;state.z=world.player.root.position.z;state.settings=settings;try{localStorage.setItem(storageKey,JSON.stringify(state));if(state.started)localStorage.setItem('xiaoxiang.v1.lastMode',JSON.stringify({mode:'explore',volumeId:'first-dream'}));}catch{if(!storageWarned){toast('此浏览器未允许保存进度，本次仍可继续漫游。');storageWarned=true;}}}
 
@@ -42,6 +45,7 @@ const camera=new T.OrthographicCamera(-45,45,34,-34,.1,210),cameraTarget=new T.V
 const ray=new T.Raycaster(),mouse=new T.Vector2();
 const footRing=new T.Mesh(new T.RingGeometry(.45,.54,32),new T.MeshBasicMaterial({color:'#f4de9f',transparent:true,opacity:.8,side:T.DoubleSide}));footRing.rotation.x=-Math.PI/2;scene.add(footRing);
 const targetRing=new T.Mesh(new T.RingGeometry(.22,.32,24),new T.MeshBasicMaterial({color:'#d4b478',transparent:true,opacity:.8,side:T.DoubleSide}));targetRing.rotation.x=-Math.PI/2;targetRing.visible=false;scene.add(targetRing);
+const routeVisual=createRouteGuide(scene,world.groundHeight);
 const zoneLabels=places.map(place=>{const e=document.createElement('div');e.className='location-label';e.textContent=place.name;$('location-labels').append(e);return {e,...place};});
 const npcLabels=world.npcs.map(npc=>{const e=document.createElement('div');e.className='npc-label';e.textContent=npc.name;$('npc-labels').append(e);return {e,npc};});
 const playerLabel=document.createElement('div');playerLabel.className='npc-label main';playerLabel.textContent='黛玉';$('npc-labels').append(playerLabel);
@@ -72,7 +76,7 @@ function talk(npc){
  if(npc.role==='intro')dialogue.lines([{who:npc.name,text:'姑娘已认得不少地方了。门前这条路老身替您记着，想回头看看，随时都能走来。'},thought(state.complete?'初来时的惶惑，已随这一日的脚步慢慢安稳下来。':journeyObjective(state).text)]);
  else dialogue.lines(characterLines(npc,state));
 }
-function interact(){if(blocked())return;updateInteraction();if(!nearest)return;waypoints=[];targetRing.visible=false;
+function interact(){if(blocked())return;updateInteraction();if(!nearest)return;waypoints=[];autoWalkStage=null;routeDirty=true;targetRing.visible=false;
  if(nearest.role){talk(nearest);return;}
  conversationNpc=null;
  if(nearest.kind==='door'){const door=world.doors.find(d=>d.id===nearest.id);door.open=!door.open;door.collider.enabled=!door.open;state.doors[door.id]=door.open;toast(door.open?'茶房门轻轻推开了。':'我将门轻轻掩好。');discover(nearest.id);save();return;}
@@ -82,6 +86,7 @@ function interact(){if(blocked())return;updateInteraction();if(!nearest)return;w
 }
 function blocked(){return !state.started||dialogue.active||$('modal').open||document.hidden;}
 function updateHUD(){
+ routeDirty=true;
  const objective=journeyObjective(state);
  $('quest-title').textContent=objective.title;$('quest-copy').textContent=objective.text;
  $('step-intro').textContent='相逢 '+state.journeyDone.length+' / '+journeyStages.length;$('step-intro').classList.toggle('done',state.arrived);$('step-intro').setAttribute('aria-label','已完成 '+state.journeyDone.length+' 段相逢');
@@ -92,12 +97,37 @@ function updateHUD(){
  $('mini-map').setAttribute('aria-label','贾府地图，圆点为黛玉'+(objective.ready.length?'，金色星芒为当前去处：'+objective.ready.map(s=>world.npcs.find(n=>n.id===s.npc).name).join('、'):'，当前相逢已全部完成')+'。点击展开地图');
  $('discover-count').textContent=`发现 ${state.discoveries.length} / ${world.interact.length}`;$('discovery-progress').max=world.interact.length;$('discovery-progress').value=state.discoveries.length;
 }
-function navigate(x,z){if(blocked())return;const path=navigation.route(world.player.root.position.x,world.player.root.position.z,x,z);if(!path.length){toast('这处暂不便落脚，试试旁边的石径。');return;}waypoints=path;targetRing.position.set(path.at(-1).x,world.groundHeight(path.at(-1).x,path.at(-1).z)+.06,path.at(-1).z);targetRing.visible=true;}
+function navigate(x,z){if(blocked())return;autoWalkStage=null;routeDirty=true;const path=navigation.route(world.player.root.position.x,world.player.root.position.z,x,z);if(!path.length){toast('这处暂不便落脚，试试旁边的石径。');return;}waypoints=path;targetRing.position.set(path.at(-1).x,world.groundHeight(path.at(-1).x,path.at(-1).z)+.06,path.at(-1).z);targetRing.visible=true;}
+function updateRouteGuide(dt=0,force=false){
+ routeElapsed+=dt;if(!force&&!routeDirty&&routeElapsed<.3)return;routeElapsed=0;
+ $('route-assist').hidden=!state.started||state.complete;
+ if(!state.started||state.complete){routePlan=null;routePoints=[];routeVisual.setPath([]);return;}
+ const p=world.player.root.position,remaining=routePlan&&remainingRoute(routePlan.points,p,navigation);
+ if(force||routeDirty||!routeFrom||Math.hypot(p.x-routeFrom.x,p.z-routeFrom.z)>4.5||!remaining){
+  routePlan=planJourneyRoute({from:p,stages:readyStages(state),npcs:world.npcs,doors:world.doors,items:world.interact,navigation,preferredId:activeClueId||autoWalkStage});
+  routeFrom={x:p.x,z:p.z};routePoints=routePlan?.points||[];routeDirty=false;
+ }else routePoints=remaining;
+ routeVisual.setPath(routePoints);
+ const arrived=routePlan&&pathLength(routePoints)<.65;
+ $('route-label').textContent=routePlan?'引路 · '+(routePlan.door?'茶房门前':routePlan.npc.name):'暂未寻到可行的路';
+ $('route-note').textContent=!routePlan?'可先沿身边石径走走':autoWalkStage?'WASD 可随时接管':arrived?(routePlan.door?'按 E 轻推门扇':'已到附近，按 E 交谈'):routePlan.door?'先推门，再入茶房':'沿淡金光点与箭头前行';
+ $('route-walk').disabled=!routePlan||Boolean(arrived&&!autoWalkStage);$('route-walk').textContent=autoWalkStage?'停步看看':arrived?(routePlan.door?'按 E 推门':'按 E 交谈'):'循路前往';
+ $('route-toggle').textContent=settings.routeGuide?'收起':'显路';$('route-toggle').setAttribute('aria-pressed',String(settings.routeGuide));
+}
+function walkJourneyRoute(){
+ if(blocked())return;
+ if(autoWalkStage){waypoints=[];autoWalkStage=null;targetRing.visible=false;updateRouteGuide(0,true);return;}
+ updateRouteGuide(0,true);if(!routePlan)return;
+ waypoints=routePlan.points.slice(1).map(p=>({...p}));if(!waypoints.length)return;
+ autoWalkStage=routePlan.stage.id;targetRing.position.set(routePlan.destination.x,world.groundHeight(routePlan.destination.x,routePlan.destination.z)+.06,routePlan.destination.z);targetRing.visible=true;updateRouteGuide(0,true);
+}
+$('route-walk').onclick=walkJourneyRoute;
+$('route-toggle').onclick=()=>{settings.routeGuide=!settings.routeGuide;updateRouteGuide(0,true);save();};
 function changeOverview(force){overview=force??!overview;document.body.classList.toggle('overview-mode',overview);$('overview').querySelector('.nav-label').textContent=overview?'回到黛玉':'俯瞰全府';$('overview').setAttribute('aria-pressed',String(overview));}
 function begin(){state.started=true;$('intro').hidden=true;changeOverview(false);save();dialogue.resume();renderer.domElement.focus({preventScroll:true});}
 $('begin').onclick=begin;$('intro').hidden=state.started;$('recenter').onclick=()=>changeOverview(false);$('overview').onclick=()=>changeOverview();$('interact-button').onclick=interact;
 
-function showModal(title){waypoints=[];keys.clear();targetRing.visible=false;dialogue.clearMemories();$('modal-title').textContent=title;$('modal-body').replaceChildren();$('modal').showModal();return $('modal-body');}
+function showModal(title){waypoints=[];autoWalkStage=null;keys.clear();targetRing.visible=false;dialogue.clearMemories();$('modal-title').textContent=title;$('modal-body').replaceChildren();$('modal').showModal();return $('modal-body');}
 $('modal-close').onclick=()=>$('modal').close();$('modal').addEventListener('click',e=>{if(e.target===$('modal')){const b=$('modal').getBoundingClientRect();if(e.clientX<b.left||e.clientX>b.right||e.clientY<b.top||e.clientY>b.bottom)$('modal').close();}});
 function journal(){
  const body=showModal('黛玉手记');
@@ -107,10 +137,6 @@ function journal(){
  for(const id of state.discoveries){const item=world.interact.find(i=>i.id===id);if(!item)continue;const entry=document.createElement('article');entry.className='journal-entry';const h=document.createElement('h3');h.textContent=item.name;const p=document.createElement('p');p.textContent=item.text;entry.append(h,p);body.append(entry);}
  const note=document.createElement('p');note.className='fine';note.textContent='游府情节为文学改编；原篇阅读保留完整原有剧情。位置、相逢、物件与选择自动保存，姊妹三人的拜访顺序可自选。';body.append(note);
 }
-function guideDestination(stage){
- if(stage.door&&!world.doors.find(d=>d.id===stage.door)?.open)return world.interact.find(i=>i.id===stage.door);
- return world.npcs.find(n=>n.id===stage.npc).approach;
-}
 function showJourneyClues(){
  const body=showModal('顺着话头');const intro=document.createElement('p');intro.textContent='方才的话，把这些去处留在了心里。也不妨先沿别的路走走。';body.append(intro);
  for(const stage of readyStages(state)){
@@ -119,7 +145,7 @@ function showJourneyClues(){
   const place=document.createElement('small');place.textContent=npc.location;
   const p=document.createElement('p');p.textContent=stage.hint;
   const actions=document.createElement('div');
-  for(const [label,walk]of [['在小图记下',false],['循路去看看',true]]){const b=document.createElement('button');b.textContent=label;b.onclick=()=>{activeClueId=stage.id;$('modal').close();updateHUD();if(walk){const point=guideDestination(stage);navigate(point.x,point.z);}else toast('已记下 · '+npc.location);};actions.append(b);}
+  for(const [label,walk]of [['在小图记下',false],['循路去看看',true]]){const b=document.createElement('button');b.textContent=label;b.onclick=()=>{activeClueId=stage.id;$('modal').close();updateHUD();updateRouteGuide(0,true);if(walk)walkJourneyRoute();else toast('已记下 · '+npc.location);};actions.append(b);}
   entry.append(h,place,p,actions);body.append(entry);
  }
 }
@@ -157,10 +183,11 @@ function drawMap(canvas,big=false){
  c.fillStyle='#939a85';for(const rock of world.mapData.rocks){const[x,z]=point(rock.x,rock.z);c.beginPath();c.arc(x,z,rock.r*s,0,Math.PI*2);c.fill();}
  c.fillStyle='#617b6a';for(const roof of world.roofs){if(roof.group.name.endsWith('_Cutaway'))continue;const r=roof.rect;const[x,z]=point(r.x-r.w/2,r.z-r.d/2);c.globalAlpha=.7;c.fillRect(x,z,r.w*s,r.d*s);}c.globalAlpha=1;
  c.fillStyle='#a6ab93';for(const o of world.solid){if(!o.enabled||o.id?.startsWith('water')||o.w>4&&o.d>4)continue;const[x,z]=point(o.x-o.w/2,o.z-o.d/2);c.fillRect(x,z,Math.max(.7,o.w*s),Math.max(.7,o.d*s));}
+ if(settings.routeGuide&&state.started&&routePoints.length>1){c.save();c.lineCap='round';c.lineJoin='round';c.beginPath();routePoints.forEach((p,i)=>i?c.lineTo(...point(p.x,p.z)):c.moveTo(...point(p.x,p.z)));c.strokeStyle='#fff5d6c9';c.lineWidth=3.4*pixels.x;c.stroke();c.strokeStyle='#b88636';c.lineWidth=1.65*pixels.x;c.setLineDash([3*pixels.x,2.5*pixels.x]);c.lineDashOffset=!big&&settings.motion&&!reducedMotion.matches?-time*3*pixels.x:0;c.stroke();c.restore();}
  if(big){c.font='17px SimSun';c.textAlign='center';c.fillStyle='#3d5c47';for(const p of places){const[x,z]=point(p.x,p.z);c.fillStyle='#fff9e7dc';c.fillRect(x-49,z-14,98,26);c.fillStyle='#42604b';c.fillText(p.name,x,z+5);}}
  for(const stage of readyStages(state)){
   const npc=world.npcs.find(n=>n.id===stage.npc),[nx,nz]=point(npc.x,npc.z);
-  drawMapTarget(c,nx,nz,pixels,big,activeClueId===stage.id);
+  drawMapTarget(c,nx,nz,pixels,big,(activeClueId||routePlan?.stage.id)===stage.id);
   if(big){c.font='13px SimSun';c.textAlign='center';c.fillStyle='#7f513f';c.fillText(npc.name,nx,nz-16*pixels.y);}
  }
  const[x,z]=point(world.player.root.position.x,world.player.root.position.z);c.fillStyle='#a7654d';c.beginPath();c.arc(x,z,big?6:3.5,0,Math.PI*2);c.fill();c.strokeStyle='#fff4db';c.lineWidth=big?2:1;c.stroke();
@@ -171,7 +198,7 @@ $('map-open').onclick=bigMap;mapCanvas.onclick=bigMap;
 
 renderer.domElement.addEventListener('pointerdown',e=>{if(e.button!==0||blocked())return;const r=renderer.domElement.getBoundingClientRect();mouse.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(mouse,camera);const ground=world.pickGround(ray.ray);if(ground)navigate(ground.x,ground.z);});
 renderer.domElement.addEventListener('wheel',e=>{if(blocked())return;e.preventDefault();if(overview){changeOverview(false);zoomHeight=26;}zoomHeight=Math.max(5.5,Math.min(29,zoomHeight+Math.sign(e.deltaY)*1.5));},{passive:false});
-document.addEventListener('keydown',e=>{if(e.repeat||e.altKey||e.ctrlKey||e.metaKey||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;if(dialogue.active||$('modal').open)return;if(!state.started){if(e.code==='Enter'||e.code==='Space'){e.preventDefault();begin();}return;}const key=e.key.toLowerCase();if(['w','a','s','d','arrowup','arrowleft','arrowdown','arrowright'].includes(key)){e.preventDefault();keys.add(key);waypoints=[];targetRing.visible=false;}else if(key==='e'){e.preventDefault();interact();}else if(key==='f'){e.preventDefault();changeOverview();}else if(key==='j'){e.preventDefault();journal();}else if(key==='m'){e.preventDefault();bigMap();}});
+document.addEventListener('keydown',e=>{if(e.repeat||e.altKey||e.ctrlKey||e.metaKey||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;if(dialogue.active||$('modal').open)return;if(!state.started){if(e.code==='Enter'||e.code==='Space'){e.preventDefault();begin();}return;}const key=e.key.toLowerCase();if(['w','a','s','d','arrowup','arrowleft','arrowdown','arrowright'].includes(key)){e.preventDefault();keys.add(key);waypoints=[];autoWalkStage=null;routeDirty=true;targetRing.visible=false;}else if(key==='e'){e.preventDefault();interact();}else if(key==='f'){e.preventDefault();changeOverview();}else if(key==='j'){e.preventDefault();journal();}else if(key==='m'){e.preventDefault();bigMap();}});
 document.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));window.addEventListener('blur',()=>{keys.clear();save();});document.addEventListener('visibilitychange',()=>{keys.clear();isHidden=document.hidden;if(isHidden){dialogue.clearMemories();stopMusic();save();}else if(settings.music&&musicUnlocked)startMusic();});
 function resize(){renderer.setSize(innerWidth,Math.max(660,innerHeight));}window.addEventListener('resize',resize);resize();
 function project(x,y,z){const p=new T.Vector3(x,y,z).project(camera);return {x:(p.x+1)*innerWidth/2,y:(1-p.y)*Math.max(660,innerHeight)/2,visible:p.z>=-1&&p.z<=1&&Math.abs(p.x)<1.1&&Math.abs(p.y)<1.1};}
@@ -185,7 +212,7 @@ function frame(){const dt=Math.min(clock.getDelta(),.05);if(isHidden)return;time
   if(forward||right){dx=(-forward+right)/Math.SQRT2;dz=(-forward-right)/Math.SQRT2;const length=Math.hypot(dx,dz);dx/=length;dz/=length;}
   else if(waypoints.length){const p=waypoints[0],distance=Math.hypot(p.x-player.position.x,p.z-player.position.z);if(distance<.01)waypoints.shift();else{dx=(p.x-player.position.x)/distance;dz=(p.z-player.position.z)/distance;routeStep=distance;}}
   if(dx||dz){const speed=Math.min(4.25*dt,routeStep),tx=player.position.x+dx*speed,tz=player.position.z+dz*speed;if(navigation.canMove(player.position.x,player.position.z,tx,tz)){player.position.x=tx;player.position.z=tz;}else{if(navigation.canMove(player.position.x,player.position.z,tx,player.position.z))player.position.x=tx;if(navigation.canMove(player.position.x,player.position.z,player.position.x,tz))player.position.z=tz;}const angle=Math.atan2(dx,dz);let diff=T.MathUtils.euclideanModulo(angle-player.rotation.y+Math.PI,Math.PI*2)-Math.PI;player.rotation.y+=diff*Math.min(1,dt*11);moving=true;}
-  if(!waypoints.length)targetRing.visible=false;
+  if(!waypoints.length){targetRing.visible=false;if(autoWalkStage){autoWalkStage=null;routeDirty=true;}}
  }
  if(!dialogue.active)conversationNpc=null;
  const characterMotion=settings.motion&&!reducedMotion.matches,focusNpc=dialogue.active?conversationNpc:nearest?.role?nearest:null,speaker=dialogue.speaker,playerSpeaking=dialogue.active&&['林黛玉','我','心中的黛玉'].includes(speaker);
@@ -208,12 +235,12 @@ function frame(){const dt=Math.min(clock.getDelta(),.05);if(isHidden)return;time
  label(playerLabel,player.position.x,player.position.y+world.player.height+.3,player.position.z,overview);
  const place=places.find(p=>player.position.x>=p.rect[0]&&player.position.x<=p.rect[2]&&player.position.z>=p.rect[1]&&player.position.z<=p.rect[3])||places[2];const placeId=activeRoom?'interior:'+activeRoom.id:place.id;if(placeId!==currentPlace){currentPlace=placeId;$('place-name').textContent=activeRoom?activeRoom.name+' · 内室':place.name;}
  for(const effect of world.animated){if(effect.type==='ripple'){const t=(time*.23+effect.phase)%1;effect.mesh.scale.setScalar(settings.motion?1+t:1);effect.mesh.material.opacity=settings.motion?.2*(1-t):.12;}}
- updateInteraction();drawMap(mapCanvas);saveClock+=dt;if(saveClock>1){saveClock=0;save();}renderer.render(scene,camera);
+ updateInteraction();updateRouteGuide(dt);routeVisual.update(time,settings.motion&&!reducedMotion.matches,Boolean(settings.routeGuide&&state.started&&!state.complete&&!dialogue.active&&!$('modal').open&&routePlan));drawMap(mapCanvas);saveClock+=dt;if(saveClock>1){saveClock=0;save();}renderer.render(scene,camera);
 }
 let audioContext,musicTimer,master,musicUnlocked=false;
 function startMusic(){if(!musicUnlocked||!settings.music)return;try{if(!audioContext){const AC=window.AudioContext||window.webkitAudioContext;audioContext=new AC();master=audioContext.createGain();master.gain.value=.065;master.connect(audioContext.destination);}audioContext.resume().catch(()=>{});if(musicTimer)return;let i=0;const melody=[0,4,7,9,7,4,2,0,2,4,7,12,9,7,4,2];const pluck=()=>{const t=audioContext.currentTime;for(const h of[1,2]){const osc=audioContext.createOscillator(),gain=audioContext.createGain();osc.frequency.value=220*Math.pow(2,melody[i%melody.length]/12)*h;gain.gain.setValueAtTime(.3/(h*h),t);gain.gain.exponentialRampToValueAtTime(.001,t+2.2);osc.connect(gain);gain.connect(master);osc.start(t);osc.stop(t+2.3);}i++;};pluck();musicTimer=setInterval(pluck,1700);}catch{settings.music=false;}}
 function stopMusic(){clearInterval(musicTimer);musicTimer=null;audioContext?.suspend().catch(()=>{});}
 const unlock=()=>{if(musicUnlocked)return;musicUnlocked=true;startMusic();};document.addEventListener('pointerdown',unlock,{once:true});document.addEventListener('keydown',unlock,{once:true});
 updateHUD();changeOverview(overview);renderer.setAnimationLoop(frame);$('loading').hidden=true;document.body.dataset.ready='true';if(state.started){changeOverview(false);const resumeNpc=state.pendingMain?.kind==='walk'?journeyStages.find(s=>s.id===journeyNodes[state.pendingMain.id]?.stage)?.npc:state.pendingMain?.tag==='intro'?'matron':null;conversationNpc=world.npcs.find(n=>n.id===resumeNpc)||null;dialogue.resume();save();}
-if(import.meta.env.DEV)window.__JIAFU_DEV__={world,nav:navigation,project,read:()=>({x:playerPosition().x,z:playerPosition().z,overview,nearest:nearest?.id,dialogue:dialogue.active,place:currentPlace,room:activeRoom?.id,discovered:[...state.discoveries],journey:[...state.journeyDone],ready:readyStages(state).map(s=>s.id),arrived:state.arrived,complete:state.complete,path:waypoints.length,fps:frameRate,calls:renderer.info.render.calls,triangles:renderer.info.render.triangles}),navigate,place(x,z){const p=navigation.nearest(x,z,3);if(!p)throw Error('No safe point');world.player.root.position.set(p.x,world.groundHeight(p.x,p.z),p.z);waypoints=[];save();},async exportGLB(){const{GLTFExporter}=await import('three/addons/exporters/GLTFExporter.js');return new GLTFExporter().parseAsync(world.root,{binary:true,onlyVisible:false});}};
+if(import.meta.env.DEV)window.__JIAFU_DEV__={world,nav:navigation,project,routeGuide:()=>({stage:routePlan?.stage.id,door:routePlan?.door?.id,distance:pathLength(routePoints),points:routePoints,autoWalking:autoWalkStage,visual:routeVisual.read()}),read:()=>({x:playerPosition().x,z:playerPosition().z,overview,nearest:nearest?.id,dialogue:dialogue.active,place:currentPlace,room:activeRoom?.id,discovered:[...state.discoveries],journey:[...state.journeyDone],ready:readyStages(state).map(s=>s.id),arrived:state.arrived,complete:state.complete,path:waypoints.length,fps:frameRate,calls:renderer.info.render.calls,triangles:renderer.info.render.triangles}),navigate,place(x,z){const p=navigation.nearest(x,z,3);if(!p)throw Error('No safe point');world.player.root.position.set(p.x,world.groundHeight(p.x,p.z),p.z);waypoints=[];save();},async exportGLB(){const{GLTFExporter}=await import('three/addons/exporters/GLTFExporter.js');return new GLTFExporter().parseAsync(world.root,{binary:true,onlyVisible:false});}};
 function playerPosition(){return world.player.root.position;}
