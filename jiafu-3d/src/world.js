@@ -181,6 +181,6 @@ export function createWorld(){
  for(const cover of roofs)cover.room=interior.rooms.find(r=>cover.group.name.startsWith(r.arch+'_')||(r.id==='hall'&&cover.group.name.startsWith('Main_Hall_Lower_Eaves')));
  const npcs=npcSpecs.map(spec=>{const person=createPerson(spec);person.root.position.set(spec.x,groundHeight(spec.x,spec.z),spec.z);person.root.rotation.y=spec.facing||0;root.add(person.root);const collider=obstacle(spec.x,spec.z,.66,.66,'npc:'+spec.id);return {...spec,...person,collider,pathIndex:0};});
  const player=createPerson(playerSpec);player.root.position.set(spawn.x,.12,spawn.z);root.add(player.root);
- return {root,solid,roofs,doors,interact,rooms:interior.rooms,interiorStats:interior.stats,assetsReady:Promise.all([interior.assetsReady,characterAssetsReady()]),npcs,player,places,bounds,spawn,landmarks,groundHeight,pickGround,levels,mapData,animated,bridgeAt,pondOutline,vegetationStats,setRoomFocus:vegetation.setRoomFocus};
+ return {root,solid,roofs,occlusionGroups:a.occlusionGroups,doors,interact,rooms:interior.rooms,interiorStats:interior.stats,assetsReady:Promise.all([interior.assetsReady,characterAssetsReady()]),npcs,player,places,bounds,spawn,landmarks,groundHeight,pickGround,levels,mapData,animated,bridgeAt,pondOutline,vegetationStats,setRoomFocus:vegetation.setRoomFocus};
 }
 

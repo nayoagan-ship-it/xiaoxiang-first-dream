@@ -6,7 +6,7 @@ import {setCutawayOpacity} from './render-stability.js';
 
 // Shared, batched geometry keeps a densely planted miniature affordable to draw.
 export function createArchitecture(root,solid,roofs){
- const mats={},buckets=new Map(),temp=new T.Object3D();
+ const mats={},buckets=new Map(),temp=new T.Object3D(),occlusionGroups=[];
  function mat(key,color,roughness=.9){if(mats[key])return mats[key];const m=new T.MeshStandardMaterial({color,roughness});m.name=key;const kind=/wood|bark|branched/.test(key)?'wood':/roof|rib/.test(key)?'roof':/stone|pave|rock|taihu|marble|ivory/.test(key)?'mineral':null;if(kind){m.userData.heritageKind=kind;heritageSurface(m,kind);}mats[key]=m;return m;}
  function cloneMaterial(source){const m=source.clone();if(source.userData.heritageKind)heritageSurface(m,source.userData.heritageKind);return m;}
  for(const [k,v]of Object.entries({ivory:'#eee1c8',stone:'#c5beaa',jade:'#416d59',wood:'#78432c',red:'#9e5439',roof:'#3d705d',rib:'#62846b',gold:'#c4a16a',grass:'#879569',soil:'#8b7e5e'}))mat(k,v);
@@ -25,6 +25,14 @@ export function createArchitecture(root,solid,roofs){
  function beam(a,b,w,m='wood',parent){const aa=new T.Vector3(...a),bb=new T.Vector3(...b),dir=bb.clone().sub(aa);const geo=new T.BoxGeometry(w,dir.length(),w);geo.applyQuaternion(new T.Quaternion().setFromUnitVectors(new T.Vector3(0,1,0),dir.normalize()));return mesh(geo,typeof m==='string'?mats[m]:m,...aa.add(bb).multiplyScalar(.5).toArray(),1,1,1,0,parent);}
  function obstacle(x,z,w,d,id='',options={}){const o={x,z,w,d,id,enabled:true,...options};solid.push(o);return o;}
  function compact(group){const batches=new Map();for(const o of group.children){if(!o.isMesh)continue;o.updateMatrix();const key=o.material.uuid;if(!batches.has(key))batches.set(key,{material:cloneMaterial(o.material),geos:[]});batches.get(key).geos.push((o.geometry.index?o.geometry.toNonIndexed():o.geometry.clone()).applyMatrix4(o.matrix));}group.clear();for(const entry of batches.values()){entry.material.forceSinglePass=true;const m=new T.Mesh(mergeGeometries(entry.geos,false),entry.material);m.castShadow=true;m.receiveShadow=true;group.add(m);entry.geos.forEach(g=>g.dispose());}return [...batches.values()].map(e=>e.material);}
+ // Keep each building independently drawable without changing its geometry or collision.
+ function occlusionGroup(name,build){
+  const counts=new Map([...buckets].map(([k,v])=>[k,v.geos.length])),children=root.children.length;
+  const result=build(),group=new T.Group();group.name=name+'_Visibility';
+  for(const child of root.children.slice(children))group.add(child);
+  for(const[k,v]of buckets){const geos=v.geos.splice(counts.get(k)||0);if(!geos.length)continue;const material=cloneMaterial(v.material),geo=mergeGeometries(geos,false);geo.normalizeNormals();const o=new T.Mesh(geo,material);o.name=name+'_'+v.material.name;o.castShadow=!material.userData.contactShadow;o.receiveShadow=o.castShadow;group.add(o);geos.forEach(g=>g.dispose());}
+  root.add(group);occlusionGroups.push({name,group});return result;
+ }
  function fader(group,rect){const materials=compact(group);materials.forEach(m=>setCutawayOpacity(m,1));roofs.push({group,rect,materials,cutaway:false});return group;}
  function wall(x,z,w,d,{height=1.9,base=.12,collide=true,material='ivory',parent}={}){
   box(x,base+(height+.35)/2,z,w,height-.35,d,material,0,parent);box(x,base+height+.06,z,w+.12,.12,d+.15,'roof',0,parent);box(x,base+.18,z,w,.34,d+.1,'stone',0,parent);
@@ -53,7 +61,7 @@ export function createArchitecture(root,solid,roofs){
  }
  function column(x,z,h=2.6,base=.12,parent,radius=.13){mesh(cyl,mats.wood,x,base+h/2,z,radius,h,radius,0,parent);box(x,base+.08,z,radius*3.5,.16,radius*3.5,'stone',0,parent);box(x,base+h-.12,z,.55,.13,.37,'gold',0,parent);obstacle(x,z,radius*2,radius*2,'column',{shape:'circle',radius,clearance:characterClearance.body,kind:'building'});obstacle(x,z,radius*3.5,radius*3.5,'column-base',{shape:'box',clearance:characterClearance.feet,kind:'building'});}
  function lattice(x,z,w,y,h,parent){box(x,y,z,w+.12,h+.12,.14,'wood',0,parent);box(x,y,z,w,h,.155,mat('window','#bcc5ae'),0,parent);for(let i=-Math.floor(w/.38)/2;i<=Math.floor(w/.38)/2;i++)box(x+i*.36,y,z+.09,.035,h,.035,'wood',0,parent);for(let yy=y-h/2+.22;yy<y+h/2;yy+=.35)box(x,yy,z+.09,w,.035,.035,'wood',0,parent);}
- function room(name,x,z,w,d,{base=.12,height=3.1,floors=1,doorWidth=2.6,roofHeight=2.1,hero=false}={}){
+ function buildRoom(name,x,z,w,d,{base=.12,height=3.1,floors=1,doorWidth=2.6,roofHeight=2.1,hero=false}={}){
   const upperHeight=height;height=Math.max(height,characterClearance.roomHeight);
   paving(x,z,w,d,{y:base});const cut=new T.Group(),backdrop=new T.Group();cut.name=name+'_Cutaway';backdrop.name=name+'_Interior_Backdrop';root.add(cut,backdrop);
   const wallH=height*.83,doorH=Math.min(3.05,height-.25);wall(x,z-d/2,w,.3,{height:wallH,base,parent:backdrop});
@@ -81,6 +89,7 @@ export function createArchitecture(root,solid,roofs){
   }
   compact(backdrop);contactShadow(x,z,w+2,d+2,base+.035);fader(cut,{x,z,w,d});roof(x,z,w+1.7,d+1.8,base+height+(floors-1)*upperHeight,name,{height:roofHeight});return {x,z,w,d,base};
  }
+ function room(name,...args){return occlusionGroup(name,()=>buildRoom(name,...args));}
  function corridor(points,{width=2.35,height=2.45,base=.12,name='Gallery',groundAt=()=>base,omitColumn=()=>false}={}){height=Math.max(height,characterClearance.corridorHeight);for(let i=1;i<points.length;i++){const[a,b]=[points[i-1],points[i]],dx=b[0]-a[0],dz=b[1]-a[1],len=Math.hypot(dx,dz),ang=Math.atan2(dz,dx),cx=(a[0]+b[0])/2,cz=(a[1]+b[1])/2;path([a,b],width,(x,z)=>groundAt(x,z)+.01);const count=Math.max(1,Math.round(len/3));for(let j=0;j<=count;j++)for(const s of[-1,1]){const x=a[0]+dx*j/count,z=a[1]+dz*j/count;const px=x-Math.sin(ang)*s*width/2,pz=z+Math.cos(ang)*s*width/2,insideTurn=points.some((p,k)=>{if(!k||k===i)return false;const q=points[k-1],vx=p[0]-q[0],vz=p[1]-q[1],t=T.MathUtils.clamp(((px-q[0])*vx+(pz-q[1])*vz)/(vx*vx+vz*vz),0,1);return Math.hypot(px-q[0]-vx*t,pz-q[1]-vz*t)<width/2-.08;});if(!insideTurn&&!omitColumn(px,pz))column(px,pz,height,groundAt(x,z));}
   const graded=Math.abs(groundAt(...a)-groundAt(...b))>.08,pieces=graded?count:1;for(let k=0;k<pieces;k++){const t=(k+.5)/pieces,x=a[0]+dx*t,z=a[1]+dz*t;roof(x,z,len/pieces+1,width+.7,groundAt(x,z)+height,name,{height:.85,rot:-ang,fadeRect:{x,z,w:Math.abs(dx)/pieces+width,d:Math.abs(dz)/pieces+width}});}}}
  function pavilion(name,x,z,{base=.3,radius=2.7,height=2.7}={}){
@@ -109,6 +118,6 @@ export function createArchitecture(root,solid,roofs){
   solid.slice(colliders).forEach(transform);roofs.slice(faders).forEach(r=>transform(r.rect));
  }
  function elevated(build,dy){const counts=new Map([...buckets].map(([k,v])=>[k,v.geos.length])),children=root.children.length;build();for(const[k,v]of buckets)for(let i=counts.get(k)||0;i<v.geos.length;i++)v.geos[i].translate(0,dy,0);for(const child of root.children.slice(children))child.position.y+=dy;}
- function finish(){for(const{material,geos}of buckets.values()){const geo=mergeGeometries(geos,false);geo.normalizeNormals();const o=new T.Mesh(geo,material);o.name=material.userData.contactShadow?'Soft_Contact_Shadows':'Batched_'+Object.keys(mats).find(k=>mats[k]===material);o.castShadow=!material.userData.contactShadow;o.receiveShadow=!material.userData.contactShadow;root.add(o);geos.forEach(g=>g.dispose());}}
- return {mats,mat,mesh,box,beam,ball,cyl,obstacle,wall,wallGaps,paving,path,roof,column,room,corridor,pavilion,lantern,contactShadow,rotated,elevated,finish};
+ function finish(){for(const{material,geos}of buckets.values()){if(!geos.length)continue;const geo=mergeGeometries(geos,false);geo.normalizeNormals();const o=new T.Mesh(geo,material);o.name=material.userData.contactShadow?'Soft_Contact_Shadows':'Batched_'+Object.keys(mats).find(k=>mats[k]===material);o.castShadow=!material.userData.contactShadow;o.receiveShadow=!material.userData.contactShadow;root.add(o);geos.forEach(g=>g.dispose());}}
+ return {mats,mat,mesh,box,beam,ball,cyl,obstacle,wall,wallGaps,paving,path,roof,column,room,corridor,pavilion,lantern,contactShadow,rotated,elevated,finish,occlusionGroup,occlusionGroups};
 }

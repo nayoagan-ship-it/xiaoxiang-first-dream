@@ -44,6 +44,8 @@ npm run dev
 
 渲染回归检查：开发服务运行在 4186 时执行 `node tools/check-render-browser.cjs`，其他端口用 `JIAFU_RENDER_URL` 指定。该检查采样茶房与正房的实际屋顶淡出、恢复过程，并在三个视角下只改变近裁剪面，检查地面和建筑是否发生大面积跳色；截图与报告写入根目录 `.cache/render-stability-qa/`。
 
+建筑透视检查：`node tools/check-building-visibility.mjs` 检查正交视线、道路预探、原始透明材质恢复及实际建筑位置。开发服务运行在 4186 时执行 `node tools/check-visibility-browser.cjs`（其他地址设置 `JIAFU_VISIBILITY_URL`），验证建筑背后的实际画面、连续绕行、透明墙壁碰撞、渐隐与恢复；结果写入 `.cache/building-visibility-qa/`。
+
 ## 目录与模型
 
 `src/` 为地图、建筑、室内、植被、人物与对话逻辑，`src/ui-theme.css` 为合并版界面主题；`public/assets/` 为运行素材；`tools/` 为模型导出与验证工具；`outputs/` 为实际渲染截图及检查记录。

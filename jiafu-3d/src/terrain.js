@@ -33,7 +33,7 @@ export function terrainHeight(x,z){
 export function buildTerrain(a,mapData){
  const{box,mesh,beam,mat,mats,ball,obstacle}=a;
  function rail(p,q,y,{wood=false,collision=true}={}){const len=Math.hypot(q[0]-p[0],q[1]-p[1]),n=Math.ceil(len/.9),m=wood?'wood':'ivory';for(let i=0;i<=n;i++){const t=i/n,x=T.MathUtils.lerp(p[0],q[0],t),z=T.MathUtils.lerp(p[1],q[1],t);if(onStair(x,z,.4))continue;box(x,y+.43,z,.12,.86,.12,m);if(!wood)mesh(ball,mats.stone,x,y+.92,z,.12,.12,.12);if(collision)obstacle(x,z,.12,.12,'terrace-rail',{shape:'box',clearance:characterClearance.railing,kind:'building'});if(i<n){const tt=(i+1)/n,xx=T.MathUtils.lerp(p[0],q[0],tt),zz=T.MathUtils.lerp(p[1],q[1],tt);if(!onStair(xx,zz,.4))beam([x,y+.8,z],[xx,y+.8,zz],.1,m);}}}
- for(const r of terraces){
+ for(const r of terraces){a.occlusionGroup('Terrace_'+r.id,()=>{
   if(r.natural){
    // Rugged rock skirts, rather than a tall rectangular stone pedestal under the hill.
    const positions=[],uv=[],n=20,rings=5;
@@ -51,7 +51,7 @@ export function buildTerrain(a,mapData){
    rail([r.x-r.w/2,r.z+r.d/2],[r.x+r.w/2,r.z+r.d/2],r.y,{wood:r.natural});
    if(r.natural){rail([r.x-r.w/2,r.z-r.d/2],[r.x-r.w/2,r.z+r.d/2],r.y,{wood:true});rail([r.x+r.w/2,r.z-r.d/2],[r.x+r.w/2,r.z+r.d/2],r.y,{wood:true});}
   }
- }
+ });}
  for(const s of stairs){
   const dx=s.to[0]-s.from[0],dz=s.to[1]-s.from[1],len=Math.hypot(dx,dz),n=Math.max(Math.ceil(len/.43),Math.ceil((s.high-s.low)/.18)),ang=Math.atan2(dx,dz);
   for(let i=0;i<n;i++){const t=(i+.5)/n,x=s.from[0]+dx*t,z=s.from[1]+dz*t,h=T.MathUtils.lerp(s.low,s.high,(i+1)/n);box(x,(h+.06)/2,z,s.width,h-.06,len/n+.015,'stone',ang);box(x,h+.005,z,s.width,.035,.07,'ivory',ang);}

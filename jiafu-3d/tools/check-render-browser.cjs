@@ -2,6 +2,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 const url=process.env.JIAFU_RENDER_URL||'http://127.0.0.1:4186/',out=path.resolve(__dirname,'../../.cache/render-stability-qa');fs.mkdirSync(out,{recursive:true});
 (async()=>{const b=await chromium.launch({executablePath:process.env.JIAFU_BROWSER_EXECUTABLE,headless:true});try{const c=await b.newContext({viewport:{width:1280,height:800},deviceScaleFactor:1});await c.addInitScript(()=>localStorage.setItem('xiaoxiang.jiafu3d.v1',JSON.stringify({version:1,worldRevision:9,journeyRevision:1,journeyDone:['gate','reception','fengjie','yingchun','xichun','tanchun','wang','baoyu','settle'],x:0,z:6,started:true,settings:{motion:true,music:false,speed:0,memories:false,routeGuide:false}})));const p=await c.newPage(),errors=[];p.on('pageerror',e=>errors.push(e.message));p.on('console',m=>{if(m.type()==='error')errors.push(m.text())});await p.goto(url);await p.waitForFunction(()=>document.body.dataset.ready==='true');await p.waitForTimeout(250);
 // Exercise the actual frame-loop cutaway before the deterministic GPU comparison.
+await p.evaluate(()=>window.__JIAFU_DEV__.visibility.setEnabled(false));
 const transitions=[];
 for(const id of ['tea','hall']){
  const room=await p.evaluate(id=>{const r=window.__JIAFU_DEV__.world.rooms.find(r=>r.id===id);return{entrance:r.entrance,inside:r.inside};},id);

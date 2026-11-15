@@ -149,7 +149,7 @@ export function buildInteriors(a,addItem){
     item('ledger','门房簿册',.3,.85,'簿册记着府中往来，旁边整齐搁着钥匙。每一重门后，都有等候与照看它的人。');
    }
   };
-  a.rotated(build,room.x,room.z,room.rot);stats.carvedDetails+=decor.count;newItems.forEach(p=>addItem(p.id,p.name,p.x,p.z,p.kind,p.text));
+  a.occlusionGroup(room.arch+'_Furnishings',()=>a.rotated(build,room.x,room.z,room.rot));stats.carvedDetails+=decor.count;newItems.forEach(p=>addItem(p.id,p.name,p.x,p.z,p.kind,p.text));
   const entrance=world(0,room.d/2+1),inside=world(0,Math.min(2,room.d/2-1));
   rooms.push({...room,entrance,inside,contains(x,z,margin=0){const dx=x-room.x,dz=z-room.z,lx=dx*c-dz*s,lz=dx*s+dz*c;return Math.abs(lx)<room.w/2-margin&&Math.abs(lz)<room.d/2-margin;}});
  }
